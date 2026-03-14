@@ -23,7 +23,15 @@ React Native audio player with **reliable iOS background playback**, media contr
 npm install react-native-mp3-player
 ```
 
-Link native projects (see [React Native docs](https://reactnative.dev/docs/linking-libraries-ios)). On iOS, enable **Background Modes → Audio** in your app capabilities.
+Link native projects (see [React Native docs](https://reactnative.dev/docs/linking-libraries-ios)).
+
+### iOS background playback
+
+For audio to continue when the app is backgrounded or the screen is locked (and to avoid the ~50 second cutoff), you must:
+
+1. **Enable Background Modes → Audio** (or “Audio, AirPlay, and Picture in Picture”) in your app’s Xcode project: select your target → **Signing & Capabilities** → **+ Capability** → **Background Modes** → check **Audio**.
+2. The package configures **AVAudioSession** (category `.playback` with options for Bluetooth, AirPlay, ducking) and handles **interruptions** and **background transitions** so that playback can continue when the app is backgrounded.
+3. **Lock screen and Control Center** controls (play, pause, seek, 15-second skip) are handled **natively**, so they work even when the JavaScript thread is suspended (e.g. screen locked). When the app returns to the foreground, events are emitted so your UI stays in sync.
 
 ## Quick start
 
@@ -58,13 +66,13 @@ TrackPlayer.registerPlaybackService(() => PlaybackService);
 ## API overview
 
 - **Lifecycle:** `setupPlayer(options?, background?)`, `registerPlaybackService(factory)`, `reset()`
-- **Queue:** `add()`, `load()`, `remove()`, `skip()`, `skipToNext()`, `skipToPrevious()`, `setQueue()`, `getQueue()`, `getActiveTrack()`, `getActiveTrackIndex()`
+- **Queue:** `add()`, `load()`, `remove()`, `skip()`, `skipToNext()`, `skipToPrevious()`, `setQueue()`, `getQueue()`, **`getActiveTrack()`** (current track), `getActiveTrackIndex()`
 - **Playback:** `play()`, `pause()`, `stop()`, `seekTo()`, `seekBy()`, `setVolume()`, `setRate()`, `setRepeatMode()`
 - **State:** `getPlaybackState()`, `getProgress()`, `getVolume()`, `getRate()`
 - **Events:** `addEventListener(event, listener)` – see `Event` enum.
-- **Hooks:** `useProgress()`, `usePlaybackState()`, `useActiveTrack()`, `useIsPlaying()`, `useTrackPlayerEvents()`, etc.
+- **Hooks:** **`useProgress(updateInterval?, background?)`** (interval in **milliseconds**; e.g. `useProgress(250)` = every 250 ms), `usePlaybackState()`, `useActiveTrack()`, `useIsPlaying()`, `useTrackPlayerEvents()`, etc.
 
-Types and options are in the package TypeScript definitions.
+**Setup options** (e.g. in `setupPlayer` / `updateOptions`): `iosCategory` (e.g. `'playback'`), `iosCategoryOptions` (e.g. `['allowAirPlay','allowBluetooth','duckOthers']`), `autoHandleInterruptions`, `autoUpdateMetadata`, `waitForBuffer`, `minBuffer` / buffer-related options, `forwardJumpInterval` / `backwardJumpInterval` (seconds, e.g. 15), `progressUpdateEventInterval` (seconds). Types and options are in the package TypeScript definitions.
 
 ## Example app
 

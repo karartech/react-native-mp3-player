@@ -7,6 +7,7 @@ import Foundation
 import AVFoundation
 import MediaPlayer
 import React
+import UIKit
 
 @objc public protocol RNTPDelegate {
     func sendEvent(name: String, body: Any)
@@ -32,10 +33,13 @@ public class RNTrackPlayer: NSObject, AudioSessionControllerDelegate {
 
     // MARK: - Lifecycle Methods
 
+    /// Default options for .playback category (no .defaultToSpeaker; that is only valid for .playbackAndRecord).
+    private static let defaultPlaybackCategoryOptions: AVAudioSession.CategoryOptions = [.allowBluetooth, .allowBluetoothA2DP, .allowAirPlay, .duckOthers]
+
     public override init() {
         super.init()
         audioSessionController.delegate = self
-        player.playWhenReady = false;
+        player.playWhenReady = false
         player.event.receiveChapterMetadata.addListener(self, handleAudioPlayerChapterMetadataReceived)
         player.event.receiveTimedMetadata.addListener(self, handleAudioPlayerTimedMetadataReceived)
         player.event.receiveCommonMetadata.addListener(self, handleAudioPlayerCommonMetadataReceived)
@@ -44,6 +48,12 @@ public class RNTrackPlayer: NSObject, AudioSessionControllerDelegate {
         player.event.currentItem.addListener(self, handleAudioPlayerCurrentItemChange)
         player.event.secondElapse.addListener(self, handleAudioPlayerSecondElapse)
         player.event.playWhenReadyChange.addListener(self, handlePlayWhenReadyChange)
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleDidEnterBackground),
+            name: UIApplication.didEnterBackgroundNotification,
+            object: nil
+        )
     }
 
     deinit {
@@ -65,10 +75,12 @@ public class RNTrackPlayer: NSObject, AudioSessionControllerDelegate {
             ])
         case let .ended(shouldResume):
             if shouldResume {
-                if (shouldResumePlaybackAfterInterruptionEnds) {
+                do {
+                    try AVAudioSession.sharedInstance().setActive(true, options: [])
+                } catch {}
+                if shouldResumePlaybackAfterInterruptionEnds {
                     player.play()
                 }
-                // Interruption Ended - playback should resume
                 emit(event: EventType.RemoteDuck, body: [
                     "paused": false
                 ])
@@ -154,8 +166,11 @@ public class RNTrackPlayer: NSObject, AudioSessionControllerDelegate {
         }
 
         let sessionCategoryOptsStr = config["iosCategoryOptions"] as? [String]
-        let mappedCategoryOpts = sessionCategoryOptsStr?.compactMap { SessionCategoryOptions(rawValue: $0)?.mapConfigToAVAudioSessionCategoryOptions() } ?? []
-        sessionCategoryOptions = AVAudioSession.CategoryOptions(mappedCategoryOpts)
+        if let opts = sessionCategoryOptsStr?.compactMap({ SessionCategoryOptions(rawValue: $0)?.mapConfigToAVAudioSessionCategoryOptions() }), !opts.isEmpty {
+            sessionCategoryOptions = AVAudioSession.CategoryOptions(opts)
+        } else if sessionCategory == .playback {
+            sessionCategoryOptions = Self.defaultPlaybackCategoryOptions
+        }
 
         if config["iosCategoryPolicy"] == nil && sessionCategory == .playback {
             sessionCategoryPolicy = .longFormAudio
@@ -164,67 +179,84 @@ public class RNTrackPlayer: NSObject, AudioSessionControllerDelegate {
         configureAudioSessionForBackgroundPlayback()
         configureAudioSession()
 
-        // setup event listeners
+        // Remote command handlers: perform native action first (so lock screen/Control Center work when JS is suspended), then emit for UI sync.
         player.remoteCommandController.handleChangePlaybackPositionCommand = { [weak self] event in
-            if let event = event as? MPChangePlaybackPositionCommandEvent {
-                self?.emit(event: EventType.RemoteSeek, body: ["position": event.positionTime])
-                return MPRemoteCommandHandlerStatus.success
+            guard let self = self, let event = event as? MPChangePlaybackPositionCommandEvent else {
+                return MPRemoteCommandHandlerStatus.commandFailed
             }
-
-            return MPRemoteCommandHandlerStatus.commandFailed
+            self.player.seek(to: event.positionTime)
+            self.emit(event: EventType.RemoteSeek, body: ["position": event.positionTime])
+            return MPRemoteCommandHandlerStatus.success
         }
 
         player.remoteCommandController.handleNextTrackCommand = { [weak self] _ in
-            self?.emit(event: EventType.RemoteNext)
+            guard let self = self else { return MPRemoteCommandHandlerStatus.commandFailed }
+            self.player.next()
+            self.emit(event: EventType.RemoteNext)
             return MPRemoteCommandHandlerStatus.success
         }
 
         player.remoteCommandController.handlePauseCommand = { [weak self] _ in
-            self?.emit(event: EventType.RemotePause)
+            guard let self = self else { return MPRemoteCommandHandlerStatus.commandFailed }
+            self.player.pause()
+            self.emit(event: EventType.RemotePause)
             return MPRemoteCommandHandlerStatus.success
         }
 
         player.remoteCommandController.handlePlayCommand = { [weak self] _ in
-            self?.emit(event: EventType.RemotePlay)
+            guard let self = self else { return MPRemoteCommandHandlerStatus.commandFailed }
+            self.player.play()
+            self.emit(event: EventType.RemotePlay)
             return MPRemoteCommandHandlerStatus.success
         }
 
         player.remoteCommandController.handlePreviousTrackCommand = { [weak self] _ in
-            self?.emit(event: EventType.RemotePrevious)
+            guard let self = self else { return MPRemoteCommandHandlerStatus.commandFailed }
+            self.player.previous()
+            self.emit(event: EventType.RemotePrevious)
             return MPRemoteCommandHandlerStatus.success
         }
 
         player.remoteCommandController.handleSkipBackwardCommand = { [weak self] event in
-            if let command = event.command as? MPSkipIntervalCommand,
-               let interval = command.preferredIntervals.first {
-                self?.emit(event: EventType.RemoteJumpBackward, body: ["interval": interval])
-                return MPRemoteCommandHandlerStatus.success
+            guard let self = self,
+                  let command = event.command as? MPSkipIntervalCommand,
+                  let interval = command.preferredIntervals.first else {
+                return MPRemoteCommandHandlerStatus.commandFailed
             }
-
-            return MPRemoteCommandHandlerStatus.commandFailed
+            let secs = Double(truncating: interval)
+            self.player.seek(to: self.player.currentTime - secs)
+            self.emit(event: EventType.RemoteJumpBackward, body: ["interval": interval])
+            return MPRemoteCommandHandlerStatus.success
         }
 
         player.remoteCommandController.handleSkipForwardCommand = { [weak self] event in
-            if let command = event.command as? MPSkipIntervalCommand,
-               let interval = command.preferredIntervals.first {
-                self?.emit(event: EventType.RemoteJumpForward, body: ["interval": interval])
-                return MPRemoteCommandHandlerStatus.success
+            guard let self = self,
+                  let command = event.command as? MPSkipIntervalCommand,
+                  let interval = command.preferredIntervals.first else {
+                return MPRemoteCommandHandlerStatus.commandFailed
             }
-
-            return MPRemoteCommandHandlerStatus.commandFailed
+            let secs = Double(truncating: interval)
+            self.player.seek(to: self.player.currentTime + secs)
+            self.emit(event: EventType.RemoteJumpForward, body: ["interval": interval])
+            return MPRemoteCommandHandlerStatus.success
         }
 
         player.remoteCommandController.handleStopCommand = { [weak self] _ in
-            self?.emit(event: EventType.RemoteStop)
+            guard let self = self else { return MPRemoteCommandHandlerStatus.commandFailed }
+            self.player.stop()
+            self.emit(event: EventType.RemoteStop)
             return MPRemoteCommandHandlerStatus.success
         }
 
         player.remoteCommandController.handleTogglePlayPauseCommand = { [weak self] _ in
-            self?.emit(event: self?.player.playerState == .paused
-                ? EventType.RemotePlay
-                : EventType.RemotePause
-            )
-
+            guard let self = self else { return MPRemoteCommandHandlerStatus.commandFailed }
+            if self.player.playerState == .paused {
+                self.player.play()
+                self.emit(event: EventType.RemotePlay)
+            } else {
+                self.player.pause()
+                self.emit(event: EventType.RemotePause)
+            }
             return MPRemoteCommandHandlerStatus.success
         }
 
@@ -261,13 +293,14 @@ public class RNTrackPlayer: NSObject, AudioSessionControllerDelegate {
     }
 
     private func configureAudioSession() {
-
-        if (player.currentItem == nil) {
-            try? audioSessionController.deactivateSession()
+        if player.currentItem == nil {
+            if UIApplication.shared.applicationState == .active {
+                try? audioSessionController.deactivateSession()
+            }
             return
         }
 
-        if (player.playWhenReady) {
+        if player.playWhenReady {
             try? audioSessionController.activateSession()
             if #available(iOS 11.0, *) {
                 try? AVAudioSession.sharedInstance().setCategory(sessionCategory, mode: sessionCategoryMode, policy: sessionCategoryPolicy, options: sessionCategoryOptions)
@@ -276,6 +309,19 @@ public class RNTrackPlayer: NSObject, AudioSessionControllerDelegate {
             }
             try? AVAudioSession.sharedInstance().setActive(true, options: [])
         }
+    }
+
+    @objc private func handleDidEnterBackground() {
+        guard player.currentItem != nil else { return }
+        let session = AVAudioSession.sharedInstance()
+        do {
+            if #available(iOS 11.0, *) {
+                try session.setCategory(sessionCategory, mode: sessionCategoryMode, policy: sessionCategoryPolicy, options: sessionCategoryOptions)
+            } else {
+                try session.setCategory(sessionCategory, mode: sessionCategoryMode, options: sessionCategoryOptions)
+            }
+            try session.setActive(true, options: [])
+        } catch {}
     }
 
     @objc(isServiceRunning:rejecter:)
@@ -633,7 +679,7 @@ public class RNTrackPlayer: NSObject, AudioSessionControllerDelegate {
         }
         player.clear()
         try? player.add(items: tracks)
-        resolve(index)
+        resolve(NSNull())
     }
 
     @objc(getActiveTrack:rejecter:)
