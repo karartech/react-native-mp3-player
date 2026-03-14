@@ -1,6 +1,6 @@
 //
 //  MetadataAdapter.swift
-//  react-native-track-player
+//  react-native-mp3-player
 //
 //  Created by David Chavez on 01.08.23.
 //  Copyright © 2023 Double Symmetry. All rights reserved.

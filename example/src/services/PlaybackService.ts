@@ -1,5 +1,5 @@
 import { Platform, NativeModules } from 'react-native';
-import TrackPlayer, { Event, State } from 'react-native-track-player';
+import TrackPlayer, { Event, State } from 'react-native-mp3-player';
 import { SetupService } from './SetupService';
 import { QueueInitialTracksService } from './QueueInitialTracksService';
 

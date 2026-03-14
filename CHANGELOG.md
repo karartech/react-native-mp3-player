@@ -1,3 +1,11 @@
+# [1.0.3](https://github.com/alkarartech/react-native-mp3-player/compare/v1.0.2...v1.0.3) (2025-03-13)
+
+- **ios:** Fix Swift header import in TrackPlayer.mm: use `react_native_mp3_player-Swift.h` (Xcode / pod rename compatibility).
+- **ios:** Fix MTAudioProcessingTapCreate for Xcode 16+ / iOS SDK: use `Unmanaged<MTAudioProcessingTap>?` and `takeRetainedValue()` (AudioTap.swift).
+- **android:** Add `MediaSessionService` intent action for system media control discovery; manifest already had `FOREGROUND_SERVICE_MEDIA_PLAYBACK` and `foregroundServiceType="mediaPlayback"` (Android 14/15 compliant).
+- **docs:** README now documents Android background playback requirements and cross-platform compatibility; no patches required for production builds.
+- Example app and Windows autolink updated to use `react-native-mp3-player`.
+
 # [4.1.1](https://github.com/doublesymmetry/react-native-track-player/compare/v4.1.0...v4.1.1) (2024-03-26)
 
 - **RN:** Fixes an issue when using local assets in release builds

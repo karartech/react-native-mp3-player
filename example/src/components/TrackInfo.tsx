@@ -1,6 +1,6 @@
 import React from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
-import type { Track } from 'react-native-track-player';
+import type { Track } from 'react-native-mp3-player';
 
 export const TrackInfo: React.FC<{
   track?: Track;

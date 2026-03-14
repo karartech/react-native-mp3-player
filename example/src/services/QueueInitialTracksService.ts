@@ -1,4 +1,4 @@
-import TrackPlayer, { Track } from 'react-native-track-player';
+import TrackPlayer, { Track } from 'react-native-mp3-player';
 
 import playlistData from '../assets/data/playlist.json';
 // @ts-expect-error – sure we can import this
