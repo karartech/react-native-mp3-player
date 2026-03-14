@@ -9,7 +9,9 @@ React Native audio player with **reliable iOS background playback**, media contr
 
 ## Features
 
-- **iOS background playback** – Audio continues when the app is in the background (no ~50s cutoff). Uses `AVAudioSession` with `.longFormAudio` and interruption handling.
+- **Background playback (iOS & Android)** – Audio continues when the app is in the background or the screen is locked. No patches required; compatible with current Xcode and Android 14/15.
+- **iOS** – Uses `AVAudioSession` with `.longFormAudio` and interruption handling; lock screen and Control Center work natively.
+- **Android** – Uses Media3 `MediaLibraryService` with `foregroundServiceType="mediaPlayback"`; system media notification, lock screen, and Android Auto are supported.
 - **Multi-platform** – Android, iOS, Windows.
 - **Media controls** – Lock screen, notification, Bluetooth, Android Auto.
 - **Queue & playback** – Add, remove, reorder tracks; play, pause, seek, repeat, crossfade (where supported).
@@ -32,6 +34,15 @@ For audio to continue when the app is backgrounded or the screen is locked (and 
 1. **Enable Background Modes → Audio** (or “Audio, AirPlay, and Picture in Picture”) in your app’s Xcode project: select your target → **Signing & Capabilities** → **+ Capability** → **Background Modes** → check **Audio**.
 2. The package configures **AVAudioSession** (category `.playback` with options for Bluetooth, AirPlay, ducking) and handles **interruptions** and **background transitions** so that playback can continue when the app is backgrounded.
 3. **Lock screen and Control Center** controls (play, pause, seek, 15-second skip) are handled **natively**, so they work even when the JavaScript thread is suspended (e.g. screen locked). When the app returns to the foreground, events are emitted so your UI stays in sync.
+
+### Android background playback
+
+The package is built for **Android 14+** compatibility and works when the app is in the background or the screen is off:
+
+1. **Foreground service:** The library declares `FOREGROUND_SERVICE_MEDIA_PLAYBACK` and uses `android:foregroundServiceType="mediaPlayback"` on the playback service, as required since Android 14. No extra setup in your app is needed.
+2. **Media3 / ExoPlayer:** Playback runs in a **MediaLibraryService** (Media3), which correctly starts as a foreground service with type `mediaPlayback`, so background playback and the media notification are allowed by the system.
+3. **Media controls:** The service is advertised via **MediaSessionService** and **MediaLibraryService** so the system media notification, lock screen, Bluetooth, and Android Auto can discover and control playback.
+4. **Target SDK:** The library compiles with `compileSdkVersion` 35 and defaults to `targetSdkVersion` 34. Your app can override these via `react-native-mp3-player`’s build extras if needed. **Android 15:** Do not start the media service from a `BOOT_COMPLETED` receiver; the platform no longer allows that for media playback.
 
 ## Quick start
 
