@@ -186,6 +186,15 @@ public class RNTrackPlayer: NSObject, AudioSessionControllerDelegate {
         configureAudioSessionForBackgroundPlayback()
         configureAudioSession()
 
+        // Enable remote control events as soon as the player is set up so the lock screen widget can appear on first track load.
+        if Thread.isMainThread {
+            UIApplication.shared.beginReceivingRemoteControlEvents()
+        } else {
+            DispatchQueue.main.sync {
+                UIApplication.shared.beginReceivingRemoteControlEvents()
+            }
+        }
+
         // Remote command handlers: perform native action first (so lock screen/Control Center work when JS is suspended), then emit for UI sync.
         player.remoteCommandController.handleChangePlaybackPositionCommand = { [weak self] event in
             guard let self = self, let event = event as? MPChangePlaybackPositionCommandEvent else {
@@ -567,8 +576,8 @@ public class RNTrackPlayer: NSObject, AudioSessionControllerDelegate {
         effectivePlaybackState = .playing
         player.play()
         updateNowPlayingPlaybackValuesOnMainIfNeeded()
-        resolve(NSNull())
         emit(event: EventType.PlaybackState, body: getPlaybackStateBodyKeyValues(state: .playing))
+        resolve(NSNull())
     }
 
     @objc(pause:rejecter:)
@@ -577,8 +586,8 @@ public class RNTrackPlayer: NSObject, AudioSessionControllerDelegate {
         effectivePlaybackState = .paused
         player.pause()
         updateNowPlayingPlaybackValuesOnMainIfNeeded()
-        resolve(NSNull())
         emit(event: EventType.PlaybackState, body: getPlaybackStateBodyKeyValues(state: .paused))
+        resolve(NSNull())
     }
 
     @objc(setPlayWhenReady:resolver:rejecter:)

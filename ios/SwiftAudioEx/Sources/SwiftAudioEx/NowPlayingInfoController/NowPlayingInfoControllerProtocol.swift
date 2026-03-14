@@ -25,6 +25,9 @@ public protocol NowPlayingInfoControllerProtocol {
     
     /// Optional: push playback values to the system synchronously on main (e.g. so play/pause widget updates before returning). Default merges and calls set() (async).
     func setPlaybackValuesSync(duration: TimeInterval, elapsed: TimeInterval, rate: Double)
+
+    /// Push the current info dictionary to MPNowPlayingInfoCenter synchronously on main so the lock screen widget appears immediately (e.g. on first track load).
+    func pushToCenterSync()
 }
 
 extension NowPlayingInfoControllerProtocol {
@@ -35,4 +38,6 @@ extension NowPlayingInfoControllerProtocol {
             NowPlayingInfoProperty.playbackRate(rate)
         ])
     }
+
+    public func pushToCenterSync() {}
 }

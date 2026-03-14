@@ -1,0 +1,179 @@
+{
+  "": {
+    "swift-dependencies": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/master.swiftdeps"
+  },
+  "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/Sources/SwiftAudioEx/AVPlayerWrapper/AVPlayerWrapper.swift": {
+    "dependencies": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/AVPlayerWrapper.d",
+    "object": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/AVPlayerWrapper.swift.o",
+    "swiftmodule": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/AVPlayerWrapper~partial.swiftmodule",
+    "swift-dependencies": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/AVPlayerWrapper.swiftdeps"
+  },
+  "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/Sources/SwiftAudioEx/AVPlayerWrapper/AVPlayerWrapperDelegate.swift": {
+    "dependencies": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/AVPlayerWrapperDelegate.d",
+    "object": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/AVPlayerWrapperDelegate.swift.o",
+    "swiftmodule": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/AVPlayerWrapperDelegate~partial.swiftmodule",
+    "swift-dependencies": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/AVPlayerWrapperDelegate.swiftdeps"
+  },
+  "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/Sources/SwiftAudioEx/AVPlayerWrapper/AVPlayerWrapperProtocol.swift": {
+    "dependencies": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/AVPlayerWrapperProtocol.d",
+    "object": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/AVPlayerWrapperProtocol.swift.o",
+    "swiftmodule": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/AVPlayerWrapperProtocol~partial.swiftmodule",
+    "swift-dependencies": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/AVPlayerWrapperProtocol.swiftdeps"
+  },
+  "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/Sources/SwiftAudioEx/AVPlayerWrapper/AVPlayerWrapperState.swift": {
+    "dependencies": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/AVPlayerWrapperState.d",
+    "object": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/AVPlayerWrapperState.swift.o",
+    "swiftmodule": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/AVPlayerWrapperState~partial.swiftmodule",
+    "swift-dependencies": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/AVPlayerWrapperState.swiftdeps"
+  },
+  "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/Sources/SwiftAudioEx/AudioItem.swift": {
+    "dependencies": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/AudioItem.d",
+    "object": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/AudioItem.swift.o",
+    "swiftmodule": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/AudioItem~partial.swiftmodule",
+    "swift-dependencies": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/AudioItem.swiftdeps"
+  },
+  "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/Sources/SwiftAudioEx/AudioPlayer.swift": {
+    "dependencies": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/AudioPlayer.d",
+    "object": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/AudioPlayer.swift.o",
+    "swiftmodule": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/AudioPlayer~partial.swiftmodule",
+    "swift-dependencies": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/AudioPlayer.swiftdeps"
+  },
+  "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/Sources/SwiftAudioEx/AudioPlayerError.swift": {
+    "dependencies": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/AudioPlayerError.d",
+    "object": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/AudioPlayerError.swift.o",
+    "swiftmodule": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/AudioPlayerError~partial.swiftmodule",
+    "swift-dependencies": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/AudioPlayerError.swiftdeps"
+  },
+  "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/Sources/SwiftAudioEx/AudioSessionController/AudioSession.swift": {
+    "dependencies": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/AudioSession.d",
+    "object": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/AudioSession.swift.o",
+    "swiftmodule": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/AudioSession~partial.swiftmodule",
+    "swift-dependencies": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/AudioSession.swiftdeps"
+  },
+  "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/Sources/SwiftAudioEx/AudioSessionController/AudioSessionController.swift": {
+    "dependencies": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/AudioSessionController.d",
+    "object": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/AudioSessionController.swift.o",
+    "swiftmodule": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/AudioSessionController~partial.swiftmodule",
+    "swift-dependencies": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/AudioSessionController.swiftdeps"
+  },
+  "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/Sources/SwiftAudioEx/AudioTap.swift": {
+    "dependencies": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/AudioTap.d",
+    "object": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/AudioTap.swift.o",
+    "swiftmodule": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/AudioTap~partial.swiftmodule",
+    "swift-dependencies": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/AudioTap.swiftdeps"
+  },
+  "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/Sources/SwiftAudioEx/Event.swift": {
+    "dependencies": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/Event.d",
+    "object": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/Event.swift.o",
+    "swiftmodule": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/Event~partial.swiftmodule",
+    "swift-dependencies": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/Event.swiftdeps"
+  },
+  "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/Sources/SwiftAudioEx/NowPlayingInfoController/MediaItemProperty.swift": {
+    "dependencies": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/MediaItemProperty.d",
+    "object": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/MediaItemProperty.swift.o",
+    "swiftmodule": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/MediaItemProperty~partial.swiftmodule",
+    "swift-dependencies": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/MediaItemProperty.swiftdeps"
+  },
+  "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/Sources/SwiftAudioEx/NowPlayingInfoController/NowPlayingInfoCenter.swift": {
+    "dependencies": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/NowPlayingInfoCenter.d",
+    "object": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/NowPlayingInfoCenter.swift.o",
+    "swiftmodule": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/NowPlayingInfoCenter~partial.swiftmodule",
+    "swift-dependencies": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/NowPlayingInfoCenter.swiftdeps"
+  },
+  "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/Sources/SwiftAudioEx/NowPlayingInfoController/NowPlayingInfoController.swift": {
+    "dependencies": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/NowPlayingInfoController.d",
+    "object": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/NowPlayingInfoController.swift.o",
+    "swiftmodule": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/NowPlayingInfoController~partial.swiftmodule",
+    "swift-dependencies": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/NowPlayingInfoController.swiftdeps"
+  },
+  "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/Sources/SwiftAudioEx/NowPlayingInfoController/NowPlayingInfoControllerProtocol.swift": {
+    "dependencies": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/NowPlayingInfoControllerProtocol.d",
+    "object": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/NowPlayingInfoControllerProtocol.swift.o",
+    "swiftmodule": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/NowPlayingInfoControllerProtocol~partial.swiftmodule",
+    "swift-dependencies": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/NowPlayingInfoControllerProtocol.swiftdeps"
+  },
+  "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/Sources/SwiftAudioEx/NowPlayingInfoController/NowPlayingInfoKeyValue.swift": {
+    "dependencies": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/NowPlayingInfoKeyValue.d",
+    "object": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/NowPlayingInfoKeyValue.swift.o",
+    "swiftmodule": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/NowPlayingInfoKeyValue~partial.swiftmodule",
+    "swift-dependencies": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/NowPlayingInfoKeyValue.swiftdeps"
+  },
+  "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/Sources/SwiftAudioEx/NowPlayingInfoController/NowPlayingInfoProperty.swift": {
+    "dependencies": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/NowPlayingInfoProperty.d",
+    "object": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/NowPlayingInfoProperty.swift.o",
+    "swiftmodule": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/NowPlayingInfoProperty~partial.swiftmodule",
+    "swift-dependencies": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/NowPlayingInfoProperty.swiftdeps"
+  },
+  "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/Sources/SwiftAudioEx/Observer/AVPlayerItemNotificationObserver.swift": {
+    "dependencies": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/AVPlayerItemNotificationObserver.d",
+    "object": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/AVPlayerItemNotificationObserver.swift.o",
+    "swiftmodule": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/AVPlayerItemNotificationObserver~partial.swiftmodule",
+    "swift-dependencies": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/AVPlayerItemNotificationObserver.swiftdeps"
+  },
+  "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/Sources/SwiftAudioEx/Observer/AVPlayerItemObserver.swift": {
+    "dependencies": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/AVPlayerItemObserver.d",
+    "object": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/AVPlayerItemObserver.swift.o",
+    "swiftmodule": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/AVPlayerItemObserver~partial.swiftmodule",
+    "swift-dependencies": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/AVPlayerItemObserver.swiftdeps"
+  },
+  "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/Sources/SwiftAudioEx/Observer/AVPlayerObserver.swift": {
+    "dependencies": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/AVPlayerObserver.d",
+    "object": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/AVPlayerObserver.swift.o",
+    "swiftmodule": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/AVPlayerObserver~partial.swiftmodule",
+    "swift-dependencies": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/AVPlayerObserver.swiftdeps"
+  },
+  "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/Sources/SwiftAudioEx/Observer/AVPlayerTimeObserver.swift": {
+    "dependencies": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/AVPlayerTimeObserver.d",
+    "object": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/AVPlayerTimeObserver.swift.o",
+    "swiftmodule": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/AVPlayerTimeObserver~partial.swiftmodule",
+    "swift-dependencies": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/AVPlayerTimeObserver.swiftdeps"
+  },
+  "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/Sources/SwiftAudioEx/QueueManager.swift": {
+    "dependencies": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/QueueManager.d",
+    "object": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/QueueManager.swift.o",
+    "swiftmodule": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/QueueManager~partial.swiftmodule",
+    "swift-dependencies": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/QueueManager.swiftdeps"
+  },
+  "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/Sources/SwiftAudioEx/QueuedAudioPlayer.swift": {
+    "dependencies": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/QueuedAudioPlayer.d",
+    "object": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/QueuedAudioPlayer.swift.o",
+    "swiftmodule": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/QueuedAudioPlayer~partial.swiftmodule",
+    "swift-dependencies": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/QueuedAudioPlayer.swiftdeps"
+  },
+  "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/Sources/SwiftAudioEx/RemoteCommandController/RemoteCommand.swift": {
+    "dependencies": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/RemoteCommand.d",
+    "object": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/RemoteCommand.swift.o",
+    "swiftmodule": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/RemoteCommand~partial.swiftmodule",
+    "swift-dependencies": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/RemoteCommand.swiftdeps"
+  },
+  "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/Sources/SwiftAudioEx/RemoteCommandController/RemoteCommandController.swift": {
+    "dependencies": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/RemoteCommandController.d",
+    "object": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/RemoteCommandController.swift.o",
+    "swiftmodule": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/RemoteCommandController~partial.swiftmodule",
+    "swift-dependencies": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/RemoteCommandController.swiftdeps"
+  },
+  "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/Sources/SwiftAudioEx/RepeatMode.swift": {
+    "dependencies": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/RepeatMode.d",
+    "object": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/RepeatMode.swift.o",
+    "swiftmodule": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/RepeatMode~partial.swiftmodule",
+    "swift-dependencies": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/RepeatMode.swiftdeps"
+  },
+  "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/Sources/SwiftAudioEx/TimeEventFrequency.swift": {
+    "dependencies": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/TimeEventFrequency.d",
+    "object": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/TimeEventFrequency.swift.o",
+    "swiftmodule": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/TimeEventFrequency~partial.swiftmodule",
+    "swift-dependencies": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/TimeEventFrequency.swiftdeps"
+  },
+  "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/Sources/SwiftAudioEx/Utils/DispatchQueueType.swift": {
+    "dependencies": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/DispatchQueueType.d",
+    "object": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/DispatchQueueType.swift.o",
+    "swiftmodule": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/DispatchQueueType~partial.swiftmodule",
+    "swift-dependencies": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/DispatchQueueType.swiftdeps"
+  },
+  "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/Sources/SwiftAudioEx/WaveformAudioTap.swift": {
+    "dependencies": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/WaveformAudioTap.d",
+    "object": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/WaveformAudioTap.swift.o",
+    "swiftmodule": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/WaveformAudioTap~partial.swiftmodule",
+    "swift-dependencies": "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/WaveformAudioTap.swiftdeps"
+  }
+}

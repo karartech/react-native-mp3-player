@@ -1,0 +1,4 @@
+module SwiftAudioEx {
+    header "/Users/hidar313/NPM Projects/react-native-mp3-player/ios/SwiftAudioEx/.build/arm64-apple-macosx/debug/SwiftAudioEx.build/SwiftAudioEx-Swift.h"
+    requires objc
+}

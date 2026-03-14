@@ -73,7 +73,21 @@ public class NowPlayingInfoController: NowPlayingInfoControllerProtocol {
             }
         }
     }
-   
+
+    /// Push the current info dictionary to MPNowPlayingInfoCenter synchronously on main so the lock screen widget appears immediately.
+    public func pushToCenterSync() {
+        lock.lock()
+        let snapshot = self.info
+        lock.unlock()
+        if Thread.isMainThread {
+            infoCenter.nowPlayingInfo = snapshot
+        } else {
+            DispatchQueue.main.sync { [weak self] in
+                self?.infoCenter.nowPlayingInfo = snapshot
+            }
+        }
+    }
+
     private func update() {
         lock.lock()
         let snapshot = self.info

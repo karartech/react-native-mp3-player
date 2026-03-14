@@ -215,12 +215,14 @@ public class AudioPlayer: AVPlayerWrapperDelegate {
                 // (duration/elapsed/rate must be set; use 0 until the player reports real values).
                 nowPlayingInfoController.set(keyValues: [
                     MediaItemProperty.duration(0),
-                    NowPlayingInfoProperty.playbackRate(playWhenReady ? 1.0 : 0.0),
+                    NowPlayingInfoProperty.playbackRate((playWhenReady ?? self.playWhenReady) ? 1.0 : 0.0),
                     NowPlayingInfoProperty.elapsedPlaybackTime(0)
                 ])
                 loadNowPlayingMetaValues()
+                // Push to center synchronously on main so the lock screen widget appears immediately on first play.
+                nowPlayingInfoController.pushToCenterSync()
             }
-            
+
             enableRemoteCommands(forItem: item)
             
             wrapper.load(
@@ -429,6 +431,9 @@ public class AudioPlayer: AVPlayerWrapperDelegate {
     }
 
     func AVWrapper(didUpdateDuration duration: Double) {
+        if automaticallyUpdateNowPlayingInfo {
+            nowPlayingInfoController.set(keyValue: MediaItemProperty.duration(duration))
+        }
         event.updateDuration.emit(data: duration)
     }
     
