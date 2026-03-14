@@ -1,0 +1,94 @@
+{
+  "name": "react-native-mp3-player",
+  "version": "1.0.0",
+  "description": "React Native audio player with reliable iOS background playback. Media controls, queue, hooks. Built for stability and long-running playback.",
+  "main": "lib/src/index.js",
+  "types": "lib/src/index.d.ts",
+  "react-native": "src/index",
+  "source": "src/index",
+  "scripts": {
+    "build": "rimraf lib && tsc",
+    "dev": "tsc --watch",
+    "format": "prettier --write src",
+    "types": "tsc --noEmit true",
+    "prepare": "npm run build",
+    "example": "npm run start --prefix example",
+    "pods": "cd example/ios && pod install",
+    "bootstrap": "npm install --prefix example && npm install && npm run pods",
+    "ci:format": "prettier --check src"
+  },
+  "files": [
+    "src",
+    "lib/**/*",
+    "ios/**/*",
+    "android/src/**/*",
+    "android/build.gradle",
+    "android/build.gradle.kts",
+    "android/proguard-rules.txt",
+    "react-native-mp3-player.podspec",
+    "specs"
+  ],
+  "contributors": [
+    {
+      "name": "David Chavez",
+      "email": "david@dcvz.io",
+      "url": "http://dcvz.io"
+    },
+    {
+      "name": "Guilherme Chaguri",
+      "email": "guichaguri@gmail.com",
+      "url": "http://guichaguri.com"
+    },
+    {
+      "name": "Dustin Bahr",
+      "email": "dustin@curiousmedia.com"
+    }
+  ],
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/alkarartech/react-native-mp3-player.git"
+  },
+  "bugs": {
+    "url": "https://github.com/alkarartech/react-native-mp3-player/issues"
+  },
+  "homepage": "https://github.com/alkarartech/react-native-mp3-player#readme",
+  "keywords": [
+    "react",
+    "react-native",
+    "audio-player",
+    "mp3",
+    "music",
+    "background-audio",
+    "media-controls",
+    "hooks"
+  ],
+  "codegenConfig": {
+    "name": "NativeTrackPlayerSpec",
+    "type": "modules",
+    "jsSrcsDir": "specs",
+    "android": {
+      "javaPackageName": "com.doublesymmetry.trackplayer"
+    },
+    "ios": {
+      "modulesProvider": {
+        "TrackPlayer": "NativeTrackPlayer"
+      }
+    }
+  },
+  "peerDependencies": {
+    "react": "*",
+    "react-native": "*"
+  },
+  "devDependencies": {
+    "@react-native-community/cli": "20.0.0",
+    "@react-native/babel-preset": "0.81.1",
+    "@types/react": "^19.1.0",
+    "del-cli": "^5.1.0",
+    "prettier": "^3.0.3",
+    "react": "19.1.0",
+    "react-native": "0.81.1",
+    "rimraf": "^5.0.0",
+    "typescript": "^5.8.3"
+  }
+}

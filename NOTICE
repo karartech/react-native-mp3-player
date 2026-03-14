@@ -1,0 +1,16 @@
+react-native-mp3-player
+Copyright (c) 2025 react-native-mp3-player contributors
+
+This project is an independent derivative that draws from the following
+open-source projects, used under the Apache License, Version 2.0:
+
+- react-native-track-player
+  https://github.com/doublesymmetry/react-native-track-player
+  Copyright (c) Double Symmetry and contributors
+
+- @jamsch/react-native-track-player (APM fork)
+  https://github.com/jamsch/react-native-track-player
+  Copyright (c) jamsch and contributors
+
+Licensed under the Apache License, Version 2.0.
+See the LICENSE file for the full text.

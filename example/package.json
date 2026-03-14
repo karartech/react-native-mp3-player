@@ -1,0 +1,99 @@
+{
+  "name": "example",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "android": "react-native run-android",
+    "android:ide": "open -a /Applications/Android\\ Studio.app ./android",
+    "android:uninstall": "adb uninstall com.example",
+    "android:release": "cd android && ./gradlew clean && ./gradlew bundleRelease && cd app/build/outputs/bundle/release && pwd && ls",
+    "android:install-release": "RD=android/app/build/outputs/bundle/release && (rm $RD/app.apks || true) && bundletool build-apks --bundle=$RD/app-release.aab --output=$RD/app.apks && (adb uninstall com.example || true) && bundletool install-apks --apks=$RD/app.apks",
+    "android:logs": "android/scripts/logs",
+    "ios": "react-native run-ios",
+    "ios:sim": "react-native run-ios --simulator=\"iPhone\"",
+    "ios:ide": "open ios/*.xcworkspace/",
+    "web:start": "craco start",
+    "web:build": "craco build",
+    "windows": "react-native run-windows",
+    "start": "react-native start",
+    "test": "jest",
+    "lint": "eslint src",
+    "format": "prettier --write src",
+    "types": "tsc --noEmit true",
+    "ci:lint": "eslint src --max-warnings=0",
+    "ci:format": "prettier --check src"
+  },
+  "dependencies": {
+    "@react-native-assets/slider": "^11.0.10",
+    "mux.js": "^7.0.0",
+    "react": "19.2.0",
+    "react-dom": "^18.0.2",
+    "react-native": "0.83.0",
+    "react-native-mp3-player": "file:..",
+    "react-native-vector-icons": "^10.2.0",
+    "react-native-web": "^0.18.10",
+    "react-scripts": "5.0.1"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.28.3",
+    "@babel/plugin-proposal-export-namespace-from": "^7.18.9",
+    "@babel/preset-env": "^7.28.3",
+    "@babel/runtime": "^7.28.3",
+    "@react-native-community/cli": "20.0.1",
+    "@react-native-community/cli-platform-android": "20.0.1",
+    "@react-native-community/cli-platform-ios": "20.0.1",
+    "@react-native/babel-preset": "0.83.0",
+    "@react-native/eslint-config": "0.83.0",
+    "@react-native/metro-config": "0.83.0",
+    "@react-native/typescript-config": "0.83.0",
+    "@types/jest": "^30.0.0",
+    "@types/react": "^19.1.12",
+    "@types/react-dom": "^19.1.8",
+    "@types/react-native-vector-icons": "^6.4.18",
+    "@types/react-test-renderer": "^19.1.0",
+    "@typescript-eslint/eslint-plugin": "^8.41.0",
+    "@typescript-eslint/parser": "^8.41.0",
+    "babel-jest": "^30.1.1",
+    "babel-plugin-module-resolver": "^5.0.2",
+    "cpx": "^1.5.0",
+    "eslint": "^8.57.1",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "jest": "^30.1.1",
+    "prettier": "^3.6.2",
+    "react-app-alias-ex": "^2.1.0",
+    "react-native-clean-project": "^4.0.1",
+    "react-test-renderer": "19.1.0",
+    "rimraf": "^3.0.2",
+    "typescript": "5.9.2"
+  },
+  "jest": {
+    "preset": "react-native",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "jsx",
+      "json",
+      "node"
+    ]
+  },
+  "isSwift": true,
+  "tea": {
+    "dependencies": {
+      "classic.yarnpkg.com": "^1"
+    }
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "packageManager": "yarn@4.9.0"
+}
