@@ -27,6 +27,9 @@ public class RNTrackPlayer: NSObject, AudioSessionControllerDelegate {
     private var forwardJumpInterval: NSNumber? = nil;
     private var backwardJumpInterval: NSNumber? = nil;
     private var sessionCategory: AVAudioSession.Category = .playback
+    /// Timer work item for updating Now Playing elapsed/duration every second so the lock screen widget stays in sync.
+    private var nowPlayingUpdateWorkItem: DispatchWorkItem? = nil
+    private let nowPlayingUpdateQueue = DispatchQueue.main
     private var sessionCategoryMode: AVAudioSession.Mode = .default
     private var sessionCategoryPolicy: AVAudioSession.RouteSharingPolicy = .longFormAudio
     private var sessionCategoryOptions: AVAudioSession.CategoryOptions = []
@@ -531,6 +534,7 @@ public class RNTrackPlayer: NSObject, AudioSessionControllerDelegate {
     public func reset(resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
         if (rejectWhenNotInitialized(reject: reject)) { return }
 
+        stopNowPlayingUpdateTimer()
         player.stop()
         player.clear()
         resolve(NSNull())
@@ -541,6 +545,8 @@ public class RNTrackPlayer: NSObject, AudioSessionControllerDelegate {
         if (rejectWhenNotInitialized(reject: reject)) { return }
         player.play()
         resolve(NSNull())
+        // Emit PlaybackState immediately so in-app UI (play/pause button) updates without waiting for native state transition.
+        emit(event: EventType.PlaybackState, body: getPlaybackStateBodyKeyValues(state: .playing))
     }
 
     @objc(pause:rejecter:)
@@ -549,6 +555,8 @@ public class RNTrackPlayer: NSObject, AudioSessionControllerDelegate {
 
         player.pause()
         resolve(NSNull())
+        // Emit PlaybackState immediately so in-app UI (play/pause button) updates without waiting for native state transition.
+        emit(event: EventType.PlaybackState, body: getPlaybackStateBodyKeyValues(state: .paused))
     }
 
     @objc(setPlayWhenReady:resolver:rejecter:)
@@ -823,6 +831,33 @@ public class RNTrackPlayer: NSObject, AudioSessionControllerDelegate {
                 "position": player.currentTime,
             ] as [String : Any])
         }
+        // Keep Now Playing widget elapsed/duration in sync: update every second when we have a current item and are ready/playing/paused.
+        switch state {
+        case .ready, .playing, .paused:
+            if player.currentItem != nil && player.automaticallyUpdateNowPlayingInfo {
+                scheduleNextNowPlayingUpdate()
+            } else {
+                stopNowPlayingUpdateTimer()
+            }
+        default:
+            stopNowPlayingUpdateTimer()
+        }
+    }
+
+    private func scheduleNextNowPlayingUpdate() {
+        stopNowPlayingUpdateTimer()
+        let workItem = DispatchWorkItem { [weak self] in
+            guard let self = self, self.player.currentItem != nil, self.player.automaticallyUpdateNowPlayingInfo else { return }
+            self.player.updateNowPlayingPlaybackValues()
+            self.scheduleNextNowPlayingUpdate()
+        }
+        nowPlayingUpdateWorkItem = workItem
+        nowPlayingUpdateQueue.asyncAfter(deadline: .now() + 1.0, execute: workItem)
+    }
+
+    private func stopNowPlayingUpdateTimer() {
+        nowPlayingUpdateWorkItem?.cancel()
+        nowPlayingUpdateWorkItem = nil
     }
     
     func handleAudioPlayerCommonMetadataReceived(metadata: [AVMetadataItem]) {

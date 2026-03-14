@@ -634,6 +634,22 @@ export async function getProgress(): Promise<Progress> {
 }
 
 /**
+ * Gets the current playback position in seconds. Convenience wrapper around getProgress().
+ */
+export async function getPosition(): Promise<number> {
+  const { position } = await getProgress();
+  return position;
+}
+
+/**
+ * Gets the duration of the current track in seconds. Convenience wrapper around getProgress().
+ */
+export async function getDuration(): Promise<number> {
+  const { duration } = await getProgress();
+  return duration;
+}
+
+/**
  * Gets the playback state of the player.
  *
  * @see https://rntp.dev/docs/api/constants/state

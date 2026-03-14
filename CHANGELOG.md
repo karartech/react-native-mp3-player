@@ -1,3 +1,9 @@
+# [1.0.4](https://github.com/alkarartech/react-native-mp3-player/compare/v1.0.3...v1.0.4) (2025-03-14)
+
+- **ios:** Now Playing widget: update elapsed time and duration every second so the lock screen / Control Center never show `--:--` or stale times. A timer runs whenever a track is ready/playing/paused and calls `updateNowPlayingPlaybackValues()`.
+- **ios:** Play/pause: emit `PlaybackState` immediately after `play()` and `pause()` so in-app UI (e.g. mini player, full-screen player) updates without delay; no need to re-query `getPlaybackState()` for the button state.
+- **api:** Add `getPosition()` and `getDuration()` (delegate to `getProgress()`). README documents that state/progress use `getPlaybackState()` and `getProgress()` (no `getState`).
+
 # [1.0.3](https://github.com/alkarartech/react-native-mp3-player/compare/v1.0.2...v1.0.3) (2025-03-13)
 
 - **ios:** Fix Swift header import in TrackPlayer.mm: use `react_native_mp3_player-Swift.h` (Xcode / pod rename compatibility).

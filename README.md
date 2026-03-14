@@ -79,8 +79,8 @@ TrackPlayer.registerPlaybackService(() => PlaybackService);
 - **Lifecycle:** `setupPlayer(options?, background?)`, `registerPlaybackService(factory)`, `reset()`
 - **Queue:** `add()`, `load()`, `remove()`, `skip()`, `skipToNext()`, `skipToPrevious()`, `setQueue()`, `getQueue()`, **`getActiveTrack()`** (current track), `getActiveTrackIndex()`
 - **Playback:** `play()`, `pause()`, `stop()`, `seekTo()`, `seekBy()`, `setVolume()`, `setRate()`, `setRepeatMode()`
-- **State:** `getPlaybackState()`, `getProgress()`, `getVolume()`, `getRate()`
-- **Events:** `addEventListener(event, listener)` – see `Event` enum.
+- **State & progress:** **`getPlaybackState()`** (returns `{ state }`; use this, not `getState`), **`getProgress()`** (returns `{ position, duration, buffered }` in seconds), **`getPosition()`** and **`getDuration()`** (convenience wrappers around `getProgress()`), `getVolume()`, `getRate()`
+- **Events:** `addEventListener(event, listener)` – see `Event` enum. Listen for `Event.PlaybackState` so the UI stays in sync when the user taps play/pause.
 - **Hooks:** **`useProgress(updateInterval?, background?)`** (interval in **milliseconds**; e.g. `useProgress(250)` = every 250 ms), `usePlaybackState()`, `useActiveTrack()`, `useIsPlaying()`, `useTrackPlayerEvents()`, etc.
 
 **Setup options** (e.g. in `setupPlayer` / `updateOptions`): `iosCategory` (e.g. `'playback'`), `iosCategoryOptions` (e.g. `['allowAirPlay','allowBluetooth','duckOthers']`), `autoHandleInterruptions`, `autoUpdateMetadata`, `waitForBuffer`, `minBuffer` / buffer-related options, `forwardJumpInterval` / `backwardJumpInterval` (seconds, e.g. 15), `progressUpdateEventInterval` (seconds). Types and options are in the package TypeScript definitions.
