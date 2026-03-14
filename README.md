@@ -100,6 +100,7 @@ See [example/README.md](./example/README.md) for running the example app.
 
 ## Documentation
 
+- [PERFORMANCE.md](./PERFORMANCE.md) – Optimizing speed and reducing bridge calls (progress, events, buffers).
 - [NOTICE](./NOTICE) – Attribution and license.
 - [LICENSE](./LICENSE) – Apache-2.0.
 

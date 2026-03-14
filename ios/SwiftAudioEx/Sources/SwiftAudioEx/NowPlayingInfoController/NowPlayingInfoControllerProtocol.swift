@@ -23,4 +23,16 @@ public protocol NowPlayingInfoControllerProtocol {
     
     func clear()
     
+    /// Optional: push playback values to the system synchronously on main (e.g. so play/pause widget updates before returning). Default merges and calls set() (async).
+    func setPlaybackValuesSync(duration: TimeInterval, elapsed: TimeInterval, rate: Double)
+}
+
+extension NowPlayingInfoControllerProtocol {
+    public func setPlaybackValuesSync(duration: TimeInterval, elapsed: TimeInterval, rate: Double) {
+        set(keyValues: [
+            MediaItemProperty.duration(duration),
+            NowPlayingInfoProperty.elapsedPlaybackTime(elapsed),
+            NowPlayingInfoProperty.playbackRate(rate)
+        ])
+    }
 }

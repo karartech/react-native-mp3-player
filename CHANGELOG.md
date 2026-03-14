@@ -1,3 +1,11 @@
+# [1.0.6](https://github.com/alkarartech/react-native-mp3-player/compare/v1.0.5...v1.0.6) (2025-03-14)
+
+- **ios (play/pause reliability):** Added **effectivePlaybackState** so the very next `getPlaybackState()` after `play()` or `pause()` (from JS or lock screen) returns the new state (e.g. `"playing"` / `"paused"`) instead of the previous one. The wrapper’s state updates asynchronously; we now set effective state synchronously and use it for both the event and `getPlaybackState()`.
+- **ios (Now Playing widget):** Play/pause (from JS or MPRemoteCommandCenter) now updates **MPNowPlayingInfoCenter** **synchronously** via `setPlaybackValuesSync` (duration, elapsed, rate) so the widget shows the correct state before the promise resolves. Controller uses a lock and pushes to the center on the main thread.
+- **ios (remote):** All remote command handlers (play, pause, toggle, stop) set **effectivePlaybackState** and call the same **updateNowPlayingPlaybackValuesOnMainIfNeeded()** path so the widget and app stay in sync. Toggle uses **effectivePlaybackState** (or wrapper state) to decide play vs pause so repeated taps behave correctly.
+- **ios:** **reset()** clears **effectivePlaybackState** so state is taken from the player again after a full reset.
+- **ios:** **NowPlayingInfoController** now updates **MPNowPlayingInfoCenter** on the main thread (or via main async/sync) and uses a lock for all dictionary access to avoid races.
+
 # [1.0.5](https://github.com/alkarartech/react-native-mp3-player/compare/v1.0.4...v1.0.5) (2025-03-14)
 
 - **ios (Now Playing widget):** Set initial playback info as soon as a track is loaded (duration 0, elapsed 0, rate 0 or 1) so the widget never shows "Not Playing" when a track is loaded. Previously duration/rate/elapsed were set to nil during load, which could leave the widget blank or inconsistent.

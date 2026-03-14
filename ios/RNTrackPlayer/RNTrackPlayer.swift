@@ -22,7 +22,11 @@ public class RNTrackPlayer: NSObject, AudioSessionControllerDelegate {
     private var hasInitialized = false
     private let player = QueuedAudioPlayer()
     private let audioSessionController = AudioSessionController.shared
+    /// Synchronous playback state for getPlaybackState() and events. Set on play()/pause() (and remote) so the next getPlaybackState() returns the new state before the wrapper's async state update. Updated from handleAudioPlayerStateChange so ended/failed/loading etc. are correct.
+    private var effectivePlaybackState: AVPlayerWrapperState? = nil
     private var shouldEmitProgressEvent: Bool = false
+    /// When > 0 and <= 1, the progress tick already fires every second; we use it to update Now Playing instead of a separate timer.
+    private var progressUpdateEventIntervalSeconds: Double = 0
     private var shouldResumePlaybackAfterInterruptionEnds: Bool = false
     private var forwardJumpInterval: NSNumber? = nil;
     private var backwardJumpInterval: NSNumber? = nil;
@@ -201,10 +205,9 @@ public class RNTrackPlayer: NSObject, AudioSessionControllerDelegate {
 
         player.remoteCommandController.handlePauseCommand = { [weak self] _ in
             guard let self = self else { return MPRemoteCommandHandlerStatus.commandFailed }
+            self.effectivePlaybackState = .paused
             self.player.pause()
-            if self.player.currentItem != nil && self.player.automaticallyUpdateNowPlayingInfo {
-                self.player.updateNowPlayingPlaybackValues()
-            }
+            self.updateNowPlayingPlaybackValuesOnMainIfNeeded()
             self.emit(event: EventType.PlaybackState, body: self.getPlaybackStateBodyKeyValues(state: .paused))
             self.emit(event: EventType.RemotePause)
             return MPRemoteCommandHandlerStatus.success
@@ -212,10 +215,9 @@ public class RNTrackPlayer: NSObject, AudioSessionControllerDelegate {
 
         player.remoteCommandController.handlePlayCommand = { [weak self] _ in
             guard let self = self else { return MPRemoteCommandHandlerStatus.commandFailed }
+            self.effectivePlaybackState = .playing
             self.player.play()
-            if self.player.currentItem != nil && self.player.automaticallyUpdateNowPlayingInfo {
-                self.player.updateNowPlayingPlaybackValues()
-            }
+            self.updateNowPlayingPlaybackValuesOnMainIfNeeded()
             self.emit(event: EventType.PlaybackState, body: self.getPlaybackStateBodyKeyValues(state: .playing))
             self.emit(event: EventType.RemotePlay)
             return MPRemoteCommandHandlerStatus.success
@@ -254,10 +256,9 @@ public class RNTrackPlayer: NSObject, AudioSessionControllerDelegate {
 
         player.remoteCommandController.handleStopCommand = { [weak self] _ in
             guard let self = self else { return MPRemoteCommandHandlerStatus.commandFailed }
+            self.effectivePlaybackState = .stopped
             self.player.stop()
-            if self.player.currentItem != nil && self.player.automaticallyUpdateNowPlayingInfo {
-                self.player.updateNowPlayingPlaybackValues()
-            }
+            self.updateNowPlayingPlaybackValuesOnMainIfNeeded()
             self.emit(event: EventType.PlaybackState, body: self.getPlaybackStateBodyKeyValues(state: .stopped))
             self.emit(event: EventType.RemoteStop)
             return MPRemoteCommandHandlerStatus.success
@@ -265,18 +266,17 @@ public class RNTrackPlayer: NSObject, AudioSessionControllerDelegate {
 
         player.remoteCommandController.handleTogglePlayPauseCommand = { [weak self] _ in
             guard let self = self else { return MPRemoteCommandHandlerStatus.commandFailed }
-            if self.player.playerState == .paused {
+            let currentState = self.effectivePlaybackState ?? self.player.playerState
+            if currentState == .paused || currentState == .stopped || currentState == .ended {
+                self.effectivePlaybackState = .playing
                 self.player.play()
-                if self.player.currentItem != nil && self.player.automaticallyUpdateNowPlayingInfo {
-                    self.player.updateNowPlayingPlaybackValues()
-                }
+                self.updateNowPlayingPlaybackValuesOnMainIfNeeded()
                 self.emit(event: EventType.PlaybackState, body: self.getPlaybackStateBodyKeyValues(state: .playing))
                 self.emit(event: EventType.RemotePlay)
             } else {
+                self.effectivePlaybackState = .paused
                 self.player.pause()
-                if self.player.currentItem != nil && self.player.automaticallyUpdateNowPlayingInfo {
-                    self.player.updateNowPlayingPlaybackValues()
-                }
+                self.updateNowPlayingPlaybackValuesOnMainIfNeeded()
                 self.emit(event: EventType.PlaybackState, body: self.getPlaybackStateBodyKeyValues(state: .paused))
                 self.emit(event: EventType.RemotePause)
             }
@@ -377,9 +377,9 @@ public class RNTrackPlayer: NSObject, AudioSessionControllerDelegate {
                 )
             }
 
-        configureProgressUpdateEvent(
-            interval: ((options["progressUpdateEventInterval"] as? NSNumber) ?? 0).doubleValue
-        )
+        let interval = ((options["progressUpdateEventInterval"] as? NSNumber) ?? 0).doubleValue
+        progressUpdateEventIntervalSeconds = interval
+        configureProgressUpdateEvent(interval: interval)
 
         resolve(NSNull())
     }
@@ -554,6 +554,7 @@ public class RNTrackPlayer: NSObject, AudioSessionControllerDelegate {
     public func reset(resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
         if (rejectWhenNotInitialized(reject: reject)) { return }
 
+        effectivePlaybackState = nil
         stopNowPlayingUpdateTimer()
         player.stop()
         player.clear()
@@ -563,11 +564,9 @@ public class RNTrackPlayer: NSObject, AudioSessionControllerDelegate {
     @objc(play:rejecter:)
     public func play(resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
         if (rejectWhenNotInitialized(reject: reject)) { return }
+        effectivePlaybackState = .playing
         player.play()
-        // Update Now Playing widget immediately (rate 1, current elapsed) so it never shows "Not Playing".
-        if player.currentItem != nil && player.automaticallyUpdateNowPlayingInfo {
-            player.updateNowPlayingPlaybackValues()
-        }
+        updateNowPlayingPlaybackValuesOnMainIfNeeded()
         resolve(NSNull())
         emit(event: EventType.PlaybackState, body: getPlaybackStateBodyKeyValues(state: .playing))
     }
@@ -575,12 +574,9 @@ public class RNTrackPlayer: NSObject, AudioSessionControllerDelegate {
     @objc(pause:rejecter:)
     public func pause(resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
         if (rejectWhenNotInitialized(reject: reject)) { return }
-
+        effectivePlaybackState = .paused
         player.pause()
-        // Update Now Playing widget immediately (rate 0, current elapsed) so it shows "Paused" not "Not Playing".
-        if player.currentItem != nil && player.automaticallyUpdateNowPlayingInfo {
-            player.updateNowPlayingPlaybackValues()
-        }
+        updateNowPlayingPlaybackValuesOnMainIfNeeded()
         resolve(NSNull())
         emit(event: EventType.PlaybackState, body: getPlaybackStateBodyKeyValues(state: .paused))
     }
@@ -775,7 +771,8 @@ public class RNTrackPlayer: NSObject, AudioSessionControllerDelegate {
     @objc(getPlaybackState:rejecter:)
     public func getPlaybackState(resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
         if (rejectWhenNotInitialized(reject: reject)) { return }
-        resolve(getPlaybackStateBodyKeyValues(state: player.playerState))
+        let state = effectivePlaybackState ?? player.playerState
+        resolve(getPlaybackStateBodyKeyValues(state: state))
     }
 
     @objc(updateMetadataForTrack:metadata:resolver:rejecter:)
@@ -850,6 +847,7 @@ public class RNTrackPlayer: NSObject, AudioSessionControllerDelegate {
     // MARK: - QueuedAudioPlayer Event Handlers
 
     func handleAudioPlayerStateChange(state: AVPlayerWrapperState) {
+        effectivePlaybackState = state
         emit(event: EventType.PlaybackState, body: getPlaybackStateBodyKeyValues(state: state))
         if (state == .ended) {
             emit(event: EventType.PlaybackQueueEnded, body: [
@@ -857,11 +855,14 @@ public class RNTrackPlayer: NSObject, AudioSessionControllerDelegate {
                 "position": player.currentTime,
             ] as [String : Any])
         }
-        // Keep Now Playing widget elapsed/duration in sync: update every second when we have a current item and are ready/playing/paused.
+        // Keep Now Playing widget elapsed/duration in sync. When progress events fire every second (interval > 0 and <= 1), use that tick instead of a separate timer.
         switch state {
         case .ready, .playing, .paused:
             if player.currentItem != nil && player.automaticallyUpdateNowPlayingInfo {
-                scheduleNextNowPlayingUpdate()
+                let useProgressTickForNowPlaying = shouldEmitProgressEvent && progressUpdateEventIntervalSeconds > 0 && progressUpdateEventIntervalSeconds <= 1.0
+                if !useProgressTickForNowPlaying {
+                    scheduleNextNowPlayingUpdate()
+                }
             } else {
                 stopNowPlayingUpdateTimer()
             }
@@ -884,6 +885,12 @@ public class RNTrackPlayer: NSObject, AudioSessionControllerDelegate {
     private func stopNowPlayingUpdateTimer() {
         nowPlayingUpdateWorkItem?.cancel()
         nowPlayingUpdateWorkItem = nil
+    }
+
+    /// Updates MPNowPlayingInfoCenter (rate, elapsed, duration) synchronously so the widget reflects play/pause before we return to JS. Call after play()/pause() from JS or remote.
+    private func updateNowPlayingPlaybackValuesOnMainIfNeeded() {
+        guard player.currentItem != nil, player.automaticallyUpdateNowPlayingInfo else { return }
+        player.updateNowPlayingPlaybackValuesSync()
     }
     
     func handleAudioPlayerCommonMetadataReceived(metadata: [AVMetadataItem]) {
@@ -974,6 +981,9 @@ public class RNTrackPlayer: NSObject, AudioSessionControllerDelegate {
         // _after_ a manipulation to the queu causing no currentItem to exist (see reset)
         // in which case we shouldn't emit anything or we'll get an exception.
         if !shouldEmitProgressEvent || player.currentItem == nil { return }
+        if player.automaticallyUpdateNowPlayingInfo {
+            player.updateNowPlayingPlaybackValues()
+        }
         emit(
             event: EventType.PlaybackProgressUpdated,
             body: [

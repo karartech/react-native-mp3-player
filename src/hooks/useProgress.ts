@@ -1,23 +1,33 @@
 import { useEffect, useState } from 'react';
 import { AppState } from 'react-native';
 
-import { getProgress } from '../trackPlayer';
+import { getProgress, addEventListener } from '../trackPlayer';
 import { Event } from '../constants';
 import type { Progress } from '../interfaces';
 import { useTrackPlayerEvents } from './useTrackPlayerEvents';
 
-const INITIAL_STATE = {
+const INITIAL_STATE: Progress = {
   position: 0,
   duration: 0,
   buffered: 0,
 };
 
+export interface UseProgressOptions {
+  /** If true, subscribe to Event.PlaybackProgressUpdated (native-driven) when you set progressUpdateEventInterval in updateOptions. Reduces bridge round-trips vs polling. Default false. */
+  useNativeEvents?: boolean;
+}
+
 /**
- * Poll for track progress for the given interval (in miliseconds)
- * @param updateInterval - ms interval
- * @param background - if update state in background. default true. may severely affects performance.
+ * Track progress (position, duration, buffered) for the current track.
+ * @param updateInterval - Polling interval in ms when not using native events. Default 1000.
+ * @param background - Update state when app is in background. Default true. Can affect performance.
+ * @param options - useNativeEvents: true to prefer Event.PlaybackProgressUpdated (set progressUpdateEventInterval in updateOptions). Fewer bridge calls.
  */
-export function useProgress(updateInterval = 1000, background = true) {
+export function useProgress(
+  updateInterval = 1000,
+  background = true,
+  options: UseProgressOptions = {},
+) {
   const [state, setState] = useState<Progress>(INITIAL_STATE);
 
   useTrackPlayerEvents([Event.PlaybackActiveTrackChanged], () => {
@@ -27,28 +37,56 @@ export function useProgress(updateInterval = 1000, background = true) {
   useEffect(() => {
     let mounted = true;
 
-    const update = async () => {
+    const updateFromProgress = (next: Progress) => {
+      if (!mounted) return;
+      setState((prev) =>
+        next.position === prev.position &&
+        next.duration === prev.duration &&
+        next.buffered === prev.buffered
+          ? prev
+          : next
+      );
+    };
+
+    const updateFromBridge = async () => {
       try {
         if (!mounted) return;
         if (!background && AppState.currentState !== 'active') return;
-
-        const { position, duration, buffered } = await getProgress();
-        setState((state) =>
-          position === state.position &&
-          duration === state.duration &&
-          buffered === state.buffered
-            ? state
-            : { position, duration, buffered }
-        );
+        const next = await getProgress();
+        updateFromProgress(next);
       } catch {
-        // these method only throw while you haven't yet setup, ignore failure.
+        // only throws when player not set up
       }
     };
 
+    let progressSub: { remove: () => void } | null = null;
+    if (options.useNativeEvents) {
+      progressSub = addEventListener(
+        Event.PlaybackProgressUpdated,
+        (payload: { position: number; duration: number; buffered: number }) => {
+          updateFromProgress({
+            position: payload.position,
+            duration: payload.duration,
+            buffered: payload.buffered,
+          });
+        },
+      );
+    }
+
     const poll = async () => {
-      await update();
-      if (!mounted) return;
-      await new Promise<void>((resolve) => setTimeout(resolve, updateInterval));
+      if (options.useNativeEvents) {
+        await updateFromBridge();
+        if (!mounted) return;
+        await new Promise<void>((resolve) =>
+          setTimeout(resolve, Math.max(updateInterval * 3, 3000)),
+        );
+      } else {
+        await updateFromBridge();
+        if (!mounted) return;
+        await new Promise<void>((resolve) =>
+          setTimeout(resolve, updateInterval),
+        );
+      }
       if (!mounted) return;
       poll();
     };
@@ -57,8 +95,9 @@ export function useProgress(updateInterval = 1000, background = true) {
 
     return () => {
       mounted = false;
+      progressSub?.remove();
     };
-  }, [updateInterval]);
+  }, [updateInterval, options?.useNativeEvents ?? false]);
 
   return state;
 }

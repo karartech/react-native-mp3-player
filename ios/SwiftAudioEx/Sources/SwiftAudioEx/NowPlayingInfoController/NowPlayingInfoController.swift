@@ -9,13 +9,14 @@ import Foundation
 import MediaPlayer
 
 public class NowPlayingInfoController: NowPlayingInfoControllerProtocol {
+    private let lock = NSLock()
     private var infoQueue: DispatchQueueType = DispatchQueue(
         label: "NowPlayingInfoController.infoQueue",
         attributes: .concurrent
     )
 
-    private(set) var infoCenter: NowPlayingInfoCenter
     private(set) var info: [String: Any] = [:]
+    private(set) var infoCenter: NowPlayingInfoCenter
     
     public required init() {
         infoCenter = MPNowPlayingInfoCenter.default()
@@ -32,41 +33,74 @@ public class NowPlayingInfoController: NowPlayingInfoControllerProtocol {
     }
     
     public func set(keyValues: [NowPlayingInfoKeyValue]) {
-        infoQueue.async(flags: .barrier) { [weak self] in
-            guard let self = self else { return }
-            keyValues.forEach {
-                (keyValue) in self.info[keyValue.getKey()] = keyValue.getValue()
-            }
-            self.update()
+        lock.lock()
+        keyValues.forEach { keyValue in
+            self.info[keyValue.getKey()] = keyValue.getValue()
         }
+        let snapshot = self.info
+        lock.unlock()
+        pushToCenter(snapshot)
     }
 
     public func setWithoutUpdate(keyValues: [NowPlayingInfoKeyValue]) {
-        infoQueue.async(flags: .barrier) { [weak self] in
-            guard let self = self else { return }
-            keyValues.forEach {
-                (keyValue) in self.info[keyValue.getKey()] = keyValue.getValue()
-            }
+        lock.lock()
+        keyValues.forEach { keyValue in
+            self.info[keyValue.getKey()] = keyValue.getValue()
         }
+        lock.unlock()
     }
     
     public func set(keyValue: NowPlayingInfoKeyValue) {
-        infoQueue.async(flags: .barrier) { [weak self] in
-            guard let self = self else { return }
-            self.info[keyValue.getKey()] = keyValue.getValue()
-            self.update()
+        lock.lock()
+        self.info[keyValue.getKey()] = keyValue.getValue()
+        let snapshot = self.info
+        lock.unlock()
+        pushToCenter(snapshot)
+    }
+
+    public func setPlaybackValuesSync(duration: TimeInterval, elapsed: TimeInterval, rate: Double) {
+        lock.lock()
+        self.info[MPMediaItemPropertyPlaybackDuration] = NSNumber(value: duration)
+        self.info[MPNowPlayingInfoPropertyElapsedPlaybackTime] = NSNumber(value: elapsed)
+        self.info[MPNowPlayingInfoPropertyPlaybackRate] = NSNumber(value: rate)
+        let snapshot = self.info
+        lock.unlock()
+        if Thread.isMainThread {
+            infoCenter.nowPlayingInfo = snapshot
+        } else {
+            DispatchQueue.main.sync { [weak self] in
+                self?.infoCenter.nowPlayingInfo = snapshot
+            }
         }
     }
    
     private func update() {
-        infoCenter.nowPlayingInfo = info
+        lock.lock()
+        let snapshot = self.info
+        lock.unlock()
+        pushToCenter(snapshot)
+    }
+
+    private func pushToCenter(_ snapshot: [String: Any]) {
+        if Thread.isMainThread {
+            infoCenter.nowPlayingInfo = snapshot
+        } else {
+            DispatchQueue.main.async { [weak self] in
+                self?.infoCenter.nowPlayingInfo = snapshot
+            }
+        }
     }
     
     public func clear() {
-        infoQueue.async(flags: .barrier) { [weak self] in
-            guard let self = self else { return }
-            self.info = [:]
-            self.infoCenter.nowPlayingInfo = nil
+        lock.lock()
+        self.info = [:]
+        lock.unlock()
+        if Thread.isMainThread {
+            infoCenter.nowPlayingInfo = nil
+        } else {
+            DispatchQueue.main.async { [weak self] in
+                self?.infoCenter.nowPlayingInfo = nil
+            }
         }
     }
     

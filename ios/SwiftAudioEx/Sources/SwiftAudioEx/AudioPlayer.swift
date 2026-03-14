@@ -348,6 +348,14 @@ public class AudioPlayer: AVPlayerWrapperDelegate {
         ])
     }
 
+    /// Pushes current duration/elapsed/rate to MPNowPlayingInfoCenter synchronously on main so the widget updates before returning (e.g. after play/pause).
+    func updateNowPlayingPlaybackValuesSync() {
+        let duration = wrapper.duration
+        let elapsed = wrapper.currentTime
+        let rate = wrapper.playWhenReady ? Double(wrapper.rate) : 0
+        nowPlayingInfoController.setPlaybackValuesSync(duration: duration, elapsed: elapsed, rate: rate)
+    }
+
     public func clear() {
         let playbackWasActive = wrapper.playbackActive
         currentItem = nil
