@@ -202,6 +202,10 @@ public class RNTrackPlayer: NSObject, AudioSessionControllerDelegate {
         player.remoteCommandController.handlePauseCommand = { [weak self] _ in
             guard let self = self else { return MPRemoteCommandHandlerStatus.commandFailed }
             self.player.pause()
+            if self.player.currentItem != nil && self.player.automaticallyUpdateNowPlayingInfo {
+                self.player.updateNowPlayingPlaybackValues()
+            }
+            self.emit(event: EventType.PlaybackState, body: self.getPlaybackStateBodyKeyValues(state: .paused))
             self.emit(event: EventType.RemotePause)
             return MPRemoteCommandHandlerStatus.success
         }
@@ -209,6 +213,10 @@ public class RNTrackPlayer: NSObject, AudioSessionControllerDelegate {
         player.remoteCommandController.handlePlayCommand = { [weak self] _ in
             guard let self = self else { return MPRemoteCommandHandlerStatus.commandFailed }
             self.player.play()
+            if self.player.currentItem != nil && self.player.automaticallyUpdateNowPlayingInfo {
+                self.player.updateNowPlayingPlaybackValues()
+            }
+            self.emit(event: EventType.PlaybackState, body: self.getPlaybackStateBodyKeyValues(state: .playing))
             self.emit(event: EventType.RemotePlay)
             return MPRemoteCommandHandlerStatus.success
         }
@@ -247,6 +255,10 @@ public class RNTrackPlayer: NSObject, AudioSessionControllerDelegate {
         player.remoteCommandController.handleStopCommand = { [weak self] _ in
             guard let self = self else { return MPRemoteCommandHandlerStatus.commandFailed }
             self.player.stop()
+            if self.player.currentItem != nil && self.player.automaticallyUpdateNowPlayingInfo {
+                self.player.updateNowPlayingPlaybackValues()
+            }
+            self.emit(event: EventType.PlaybackState, body: self.getPlaybackStateBodyKeyValues(state: .stopped))
             self.emit(event: EventType.RemoteStop)
             return MPRemoteCommandHandlerStatus.success
         }
@@ -255,9 +267,17 @@ public class RNTrackPlayer: NSObject, AudioSessionControllerDelegate {
             guard let self = self else { return MPRemoteCommandHandlerStatus.commandFailed }
             if self.player.playerState == .paused {
                 self.player.play()
+                if self.player.currentItem != nil && self.player.automaticallyUpdateNowPlayingInfo {
+                    self.player.updateNowPlayingPlaybackValues()
+                }
+                self.emit(event: EventType.PlaybackState, body: self.getPlaybackStateBodyKeyValues(state: .playing))
                 self.emit(event: EventType.RemotePlay)
             } else {
                 self.player.pause()
+                if self.player.currentItem != nil && self.player.automaticallyUpdateNowPlayingInfo {
+                    self.player.updateNowPlayingPlaybackValues()
+                }
+                self.emit(event: EventType.PlaybackState, body: self.getPlaybackStateBodyKeyValues(state: .paused))
                 self.emit(event: EventType.RemotePause)
             }
             return MPRemoteCommandHandlerStatus.success
@@ -544,8 +564,11 @@ public class RNTrackPlayer: NSObject, AudioSessionControllerDelegate {
     public func play(resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
         if (rejectWhenNotInitialized(reject: reject)) { return }
         player.play()
+        // Update Now Playing widget immediately (rate 1, current elapsed) so it never shows "Not Playing".
+        if player.currentItem != nil && player.automaticallyUpdateNowPlayingInfo {
+            player.updateNowPlayingPlaybackValues()
+        }
         resolve(NSNull())
-        // Emit PlaybackState immediately so in-app UI (play/pause button) updates without waiting for native state transition.
         emit(event: EventType.PlaybackState, body: getPlaybackStateBodyKeyValues(state: .playing))
     }
 
@@ -554,8 +577,11 @@ public class RNTrackPlayer: NSObject, AudioSessionControllerDelegate {
         if (rejectWhenNotInitialized(reject: reject)) { return }
 
         player.pause()
+        // Update Now Playing widget immediately (rate 0, current elapsed) so it shows "Paused" not "Not Playing".
+        if player.currentItem != nil && player.automaticallyUpdateNowPlayingInfo {
+            player.updateNowPlayingPlaybackValues()
+        }
         resolve(NSNull())
-        // Emit PlaybackState immediately so in-app UI (play/pause button) updates without waiting for native state transition.
         emit(event: EventType.PlaybackState, body: getPlaybackStateBodyKeyValues(state: .paused))
     }
 

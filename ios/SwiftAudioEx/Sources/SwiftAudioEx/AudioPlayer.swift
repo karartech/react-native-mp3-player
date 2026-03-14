@@ -211,12 +211,12 @@ public class AudioPlayer: AVPlayerWrapperDelegate {
             currentItem = item
 
             if (automaticallyUpdateNowPlayingInfo) {
-                // Reset playback values without updating, because that will happen in
-                // the loadNowPlayingMetaValues call straight after:
-                nowPlayingInfoController.setWithoutUpdate(keyValues: [
-                    MediaItemProperty.duration(nil),
-                    NowPlayingInfoProperty.playbackRate(nil),
-                    NowPlayingInfoProperty.elapsedPlaybackTime(nil)
+                // Set initial playback values so the Now Playing widget never shows "Not Playing"
+                // (duration/elapsed/rate must be set; use 0 until the player reports real values).
+                nowPlayingInfoController.set(keyValues: [
+                    MediaItemProperty.duration(0),
+                    NowPlayingInfoProperty.playbackRate(playWhenReady ? 1.0 : 0.0),
+                    NowPlayingInfoProperty.elapsedPlaybackTime(0)
                 ])
                 loadNowPlayingMetaValues()
             }

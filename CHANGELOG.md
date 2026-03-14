@@ -1,3 +1,10 @@
+# [1.0.5](https://github.com/alkarartech/react-native-mp3-player/compare/v1.0.4...v1.0.5) (2025-03-14)
+
+- **ios (Now Playing widget):** Set initial playback info as soon as a track is loaded (duration 0, elapsed 0, rate 0 or 1) so the widget never shows "Not Playing" when a track is loaded. Previously duration/rate/elapsed were set to nil during load, which could leave the widget blank or inconsistent.
+- **ios (Now Playing widget):** Do not clear now playing on pause; only clear when there is no current track (e.g. after `reset()` or `setQueue()`). On pause, immediately update the widget with playback rate 0 and current elapsed time so it shows "Paused" with the track info.
+- **ios (play/pause):** After every `play()` and `pause()` (from JS or from lock screen/Control Center), immediately call `updateNowPlayingPlaybackValues()` so the widget shows the correct state, and emit `PlaybackState` so in-app UI and `getPlaybackState()` stay in sync. Remote command handlers (play, pause, toggle, stop) now also emit `PlaybackState` after the native action.
+- **ios:** Existing 1-second timer continues to update elapsed/duration during playback so the widget progress bar and times stay in sync.
+
 # [1.0.4](https://github.com/alkarartech/react-native-mp3-player/compare/v1.0.3...v1.0.4) (2025-03-14)
 
 - **ios:** Now Playing widget: update elapsed time and duration every second so the lock screen / Control Center never show `--:--` or stale times. A timer runs whenever a track is ready/playing/paused and calls `updateNowPlayingPlaybackValues()`.

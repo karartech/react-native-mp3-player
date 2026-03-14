@@ -34,6 +34,7 @@ For audio to continue when the app is backgrounded or the screen is locked (and 
 1. **Enable Background Modes → Audio** (or “Audio, AirPlay, and Picture in Picture”) in your app’s Xcode project: select your target → **Signing & Capabilities** → **+ Capability** → **Background Modes** → check **Audio**.
 2. The package configures **AVAudioSession** (category `.playback` with options for Bluetooth, AirPlay, ducking) and handles **interruptions** and **background transitions** so that playback can continue when the app is backgrounded.
 3. **Lock screen and Control Center** controls (play, pause, seek, 15-second skip) are handled **natively**, so they work even when the JavaScript thread is suspended (e.g. screen locked). When the app returns to the foreground, events are emitted so your UI stays in sync.
+4. **Now Playing widget:** The package sets and updates **MPNowPlayingInfoCenter** as soon as a track is loaded (title, artist, duration, elapsed, rate, artwork) and keeps it updated every second during playback. When you pause, the widget shows the track as paused (rate 0), not "Not Playing". Now playing info is only cleared when there is no current track (e.g. after `reset()`).
 
 ### Android background playback
 
