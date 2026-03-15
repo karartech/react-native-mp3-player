@@ -882,6 +882,9 @@ public class RNTrackPlayer: NSObject, AudioSessionControllerDelegate {
         switch state {
         case .ready, .playing, .paused:
             if player.currentItem != nil && player.automaticallyUpdateNowPlayingInfo {
+                // Force push so the widget appears immediately (avoids "Not Playing" / blank artwork).
+                player.loadNowPlayingMetaValues()
+                player.nowPlayingInfoController.pushToCenterSync()
                 let useProgressTickForNowPlaying = shouldEmitProgressEvent && progressUpdateEventIntervalSeconds > 0 && progressUpdateEventIntervalSeconds <= 1.0
                 if !useProgressTickForNowPlaying {
                     scheduleNextNowPlayingUpdate()
@@ -911,9 +914,12 @@ public class RNTrackPlayer: NSObject, AudioSessionControllerDelegate {
     }
 
     /// Updates MPNowPlayingInfoCenter (rate, elapsed, duration) synchronously so the widget reflects play/pause before we return to JS. Call after play()/pause() from JS or remote.
+    /// Also refreshes title/artist/artwork so the widget never shows "Not Playing" or blank when a track is loaded.
     private func updateNowPlayingPlaybackValuesOnMainIfNeeded() {
         guard player.currentItem != nil, player.automaticallyUpdateNowPlayingInfo else { return }
+        player.loadNowPlayingMetaValues()
         player.updateNowPlayingPlaybackValuesSync()
+        player.nowPlayingInfoController.pushToCenterSync()
     }
     
     func handleAudioPlayerCommonMetadataReceived(metadata: [AVMetadataItem]) {
@@ -953,10 +959,12 @@ public class RNTrackPlayer: NSObject, AudioSessionControllerDelegate {
             DispatchQueue.main.async {
                 UIApplication.shared.beginReceivingRemoteControlEvents();
             }
-            // Update now playing controller with isLiveStream option from track
+            // Update now playing controller with isLiveStream option from track and push so widget shows new track (e.g. after close and play again).
             if self.player.automaticallyUpdateNowPlayingInfo {
                 let isTrackLiveStream = (item as? Track)?.isLiveStream ?? false
                 self.player.nowPlayingInfoController.set(keyValue: NowPlayingInfoProperty.isLiveStream(isTrackLiveStream))
+                self.player.loadNowPlayingMetaValues()
+                self.player.nowPlayingInfoController.pushToCenterSync()
             }
         } else {
             DispatchQueue.main.async {
