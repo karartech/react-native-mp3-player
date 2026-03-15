@@ -374,6 +374,15 @@ public class RNTrackPlayer: NSObject, AudioSessionControllerDelegate {
         forwardJumpInterval = options["forwardJumpInterval"] as? NSNumber ?? forwardJumpInterval
         backwardJumpInterval = options["backwardJumpInterval"] as? NSNumber ?? backwardJumpInterval
 
+        // When jump intervals are set, prefer 15s rewind/forward as the main transport buttons (left/right)
+        // by not registering next/previous with MPRemoteCommandCenter. Only skipForward/skipBackward are used,
+        // so the lock screen shows "15 second rewind" on the left and "15 second forward" on the right.
+        let fwd = (forwardJumpInterval?.doubleValue ?? 0)
+        let bwd = (backwardJumpInterval?.doubleValue ?? 0)
+        if fwd > 0 && bwd > 0 {
+            capabilitiesStr = capabilitiesStr.filter { $0 != "next" && $0 != "previous" }
+        }
+
         player.remoteCommands = capabilitiesStr
             .compactMap { Capability(rawValue: $0) }
             .map { capability in
@@ -389,6 +398,11 @@ public class RNTrackPlayer: NSObject, AudioSessionControllerDelegate {
         let interval = ((options["progressUpdateEventInterval"] as? NSNumber) ?? 0).doubleValue
         progressUpdateEventIntervalSeconds = interval
         configureProgressUpdateEvent(interval: interval)
+
+        // Ensure Now Playing widget is visible after options change (e.g. capabilities without next/previous).
+        if player.currentItem != nil && player.automaticallyUpdateNowPlayingInfo {
+            player.nowPlayingInfoController.pushToCenterSync()
+        }
 
         resolve(NSNull())
     }

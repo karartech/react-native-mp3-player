@@ -7,6 +7,9 @@
 
 import Foundation
 import MediaPlayer
+#if canImport(UIKit)
+import UIKit
+#endif
 
 public class NowPlayingInfoController: NowPlayingInfoControllerProtocol {
     private let lock = NSLock()
@@ -75,14 +78,21 @@ public class NowPlayingInfoController: NowPlayingInfoControllerProtocol {
     }
 
     /// Push the current info dictionary to MPNowPlayingInfoCenter synchronously on main so the lock screen widget appears immediately.
+    /// Ensures remote control events are enabled before setting info so the lock screen works on first play (not only after stop → play again).
     public func pushToCenterSync() {
         lock.lock()
         let snapshot = self.info
         lock.unlock()
         if Thread.isMainThread {
+            #if canImport(UIKit)
+            UIApplication.shared.beginReceivingRemoteControlEvents()
+            #endif
             infoCenter.nowPlayingInfo = snapshot
         } else {
             DispatchQueue.main.sync { [weak self] in
+                #if canImport(UIKit)
+                UIApplication.shared.beginReceivingRemoteControlEvents()
+                #endif
                 self?.infoCenter.nowPlayingInfo = snapshot
             }
         }
