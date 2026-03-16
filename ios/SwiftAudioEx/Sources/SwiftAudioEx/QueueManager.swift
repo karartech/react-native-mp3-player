@@ -301,6 +301,7 @@ class QueueManager<Element> {
                 if (currentIndex == -1) {
                     currentIndex = items.count - 1
                 }
+                currentItemChanged = true
             } else {
                 items[currentIndex] = item
                 currentItemChanged = true

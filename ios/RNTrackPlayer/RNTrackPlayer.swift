@@ -332,15 +332,15 @@ public class RNTrackPlayer: NSObject, AudioSessionControllerDelegate {
             return
         }
 
-        if player.playWhenReady {
-            try? audioSessionController.activateSession()
-            if #available(iOS 11.0, *) {
-                try? AVAudioSession.sharedInstance().setCategory(sessionCategory, mode: sessionCategoryMode, policy: sessionCategoryPolicy, options: sessionCategoryOptions)
-            } else {
-                try? AVAudioSession.sharedInstance().setCategory(sessionCategory, mode: sessionCategoryMode, options: sessionCategoryOptions)
-            }
-            try? AVAudioSession.sharedInstance().setActive(true, options: [])
+        // Activate session whenever we have a current item so playback works after load()+play()
+        // (session may have been deactivated in setupPlayer when currentItem was nil).
+        try? audioSessionController.activateSession()
+        if #available(iOS 11.0, *) {
+            try? AVAudioSession.sharedInstance().setCategory(sessionCategory, mode: sessionCategoryMode, policy: sessionCategoryPolicy, options: sessionCategoryOptions)
+        } else {
+            try? AVAudioSession.sharedInstance().setCategory(sessionCategory, mode: sessionCategoryMode, options: sessionCategoryOptions)
         }
+        try? AVAudioSession.sharedInstance().setActive(true, options: [])
     }
 
     @objc private func handleDidEnterBackground() {
@@ -374,13 +374,12 @@ public class RNTrackPlayer: NSObject, AudioSessionControllerDelegate {
         forwardJumpInterval = options["forwardJumpInterval"] as? NSNumber ?? forwardJumpInterval
         backwardJumpInterval = options["backwardJumpInterval"] as? NSNumber ?? backwardJumpInterval
 
-        // When jump intervals are set, prefer 15s rewind/forward as the main transport buttons (left/right)
-        // by not registering next/previous with MPRemoteCommandCenter. Only skipForward/skipBackward are used,
-        // so the lock screen shows "15 second rewind" on the left and "15 second forward" on the right.
-        let fwd = (forwardJumpInterval?.doubleValue ?? 0)
-        let bwd = (backwardJumpInterval?.doubleValue ?? 0)
-        if fwd > 0 && bwd > 0 {
-            capabilitiesStr = capabilitiesStr.filter { $0 != "next" && $0 != "previous" }
+        // When both jump intervals are set, use only skip-forward/skip-backward for the main transport
+        // so the lock screen shows 15s rewind (left) and 15s forward (right), not previous/next track.
+        let useJumpButtonsForTransport = (forwardJumpInterval.map { $0.intValue > 0 } ?? false)
+            && (backwardJumpInterval.map { $0.intValue > 0 } ?? false)
+        if useJumpButtonsForTransport {
+            capabilitiesStr = capabilitiesStr.filter { $0 != "previous" && $0 != "next" }
         }
 
         player.remoteCommands = capabilitiesStr
@@ -398,11 +397,6 @@ public class RNTrackPlayer: NSObject, AudioSessionControllerDelegate {
         let interval = ((options["progressUpdateEventInterval"] as? NSNumber) ?? 0).doubleValue
         progressUpdateEventIntervalSeconds = interval
         configureProgressUpdateEvent(interval: interval)
-
-        // Ensure Now Playing widget is visible after options change (e.g. capabilities without next/previous).
-        if player.currentItem != nil && player.automaticallyUpdateNowPlayingInfo {
-            player.nowPlayingInfoController.pushToCenterSync()
-        }
 
         resolve(NSNull())
     }
@@ -589,6 +583,8 @@ public class RNTrackPlayer: NSObject, AudioSessionControllerDelegate {
         if (rejectWhenNotInitialized(reject: reject)) { return }
         effectivePlaybackState = .playing
         player.play()
+        // Activate audio session when starting playback so sound actually plays (session may be inactive after setup when no track was loaded yet).
+        configureAudioSession()
         updateNowPlayingPlaybackValuesOnMainIfNeeded()
         resolve(NSNull())
         emit(event: EventType.PlaybackState, body: getPlaybackStateBodyKeyValues(state: .playing))
@@ -882,9 +878,6 @@ public class RNTrackPlayer: NSObject, AudioSessionControllerDelegate {
         switch state {
         case .ready, .playing, .paused:
             if player.currentItem != nil && player.automaticallyUpdateNowPlayingInfo {
-                // Force push so the widget appears immediately (avoids "Not Playing" / blank artwork).
-                player.loadNowPlayingMetaValues()
-                player.nowPlayingInfoController.pushToCenterSync()
                 let useProgressTickForNowPlaying = shouldEmitProgressEvent && progressUpdateEventIntervalSeconds > 0 && progressUpdateEventIntervalSeconds <= 1.0
                 if !useProgressTickForNowPlaying {
                     scheduleNextNowPlayingUpdate()
@@ -914,12 +907,9 @@ public class RNTrackPlayer: NSObject, AudioSessionControllerDelegate {
     }
 
     /// Updates MPNowPlayingInfoCenter (rate, elapsed, duration) synchronously so the widget reflects play/pause before we return to JS. Call after play()/pause() from JS or remote.
-    /// Also refreshes title/artist/artwork so the widget never shows "Not Playing" or blank when a track is loaded.
     private func updateNowPlayingPlaybackValuesOnMainIfNeeded() {
         guard player.currentItem != nil, player.automaticallyUpdateNowPlayingInfo else { return }
-        player.loadNowPlayingMetaValues()
         player.updateNowPlayingPlaybackValuesSync()
-        player.nowPlayingInfoController.pushToCenterSync()
     }
     
     func handleAudioPlayerCommonMetadataReceived(metadata: [AVMetadataItem]) {
@@ -959,12 +949,10 @@ public class RNTrackPlayer: NSObject, AudioSessionControllerDelegate {
             DispatchQueue.main.async {
                 UIApplication.shared.beginReceivingRemoteControlEvents();
             }
-            // Update now playing controller with isLiveStream option from track and push so widget shows new track (e.g. after close and play again).
+            // Update now playing controller with isLiveStream option from track
             if self.player.automaticallyUpdateNowPlayingInfo {
                 let isTrackLiveStream = (item as? Track)?.isLiveStream ?? false
                 self.player.nowPlayingInfoController.set(keyValue: NowPlayingInfoProperty.isLiveStream(isTrackLiveStream))
-                self.player.loadNowPlayingMetaValues()
-                self.player.nowPlayingInfoController.pushToCenterSync()
             }
         } else {
             DispatchQueue.main.async {

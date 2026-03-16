@@ -1,6 +1,6 @@
 {
   "name": "react-native-mp3-player",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "description": "React Native audio player with reliable iOS background playback. Media controls, queue, hooks. Built for stability and long-running playback.",
   "main": "lib/src/index.js",
   "types": "lib/src/index.d.ts",
