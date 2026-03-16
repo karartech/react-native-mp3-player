@@ -85,13 +85,13 @@ extension AVPlayerWrapper {
         }
         
         
-        // https://stackoverflow.com/questions/79679383/unmanaged-object-pointer-build-issues-in-xcode-26-beta
-        // Xcode 16+ / 26 SDK: tapOut expects Unmanaged<MTAudioProcessingTap>? (API returns retained CF object).
-        var tapRef: Unmanaged<MTAudioProcessingTap>?
+        // Xcode 26+: MTAudioProcessingTapCreate tapOut is imported as UnsafeMutablePointer<MTAudioProcessingTap?>
+        // (managed), so use MTAudioProcessingTap? and do not use Unmanaged/takeRetainedValue().
+        var tapRef: MTAudioProcessingTap?
         let error = MTAudioProcessingTapCreate(kCFAllocatorDefault, &callbacks, kMTAudioProcessingTapCreationFlag_PreEffects, &tapRef)
         assert(error == noErr)
         
-        params.audioTapProcessor = tapRef?.takeRetainedValue()
+        params.audioTapProcessor = tapRef
         
         audioMix.inputParameters = [params]
         item.audioMix = audioMix

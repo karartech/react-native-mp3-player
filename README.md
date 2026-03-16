@@ -82,9 +82,40 @@ TrackPlayer.registerPlaybackService(() => PlaybackService);
 - **Playback:** `play()`, `pause()`, `stop()`, `seekTo()`, `seekBy()`, `setVolume()`, `setRate()`, `setRepeatMode()`
 - **State & progress:** **`getPlaybackState()`** (returns `{ state }`; use this, not `getState`), **`getProgress()`** (returns `{ position, duration, buffered }` in seconds), **`getPosition()`** and **`getDuration()`** (convenience wrappers around `getProgress()`), `getVolume()`, `getRate()`
 - **Events:** `addEventListener(event, listener)` – see `Event` enum. Listen for `Event.PlaybackState` so the UI stays in sync when the user taps play/pause.
-- **Hooks:** **`useProgress(updateInterval?, background?)`** (interval in **milliseconds**; e.g. `useProgress(250)` = every 250 ms), `usePlaybackState()`, `useActiveTrack()`, `useIsPlaying()`, `useTrackPlayerEvents()`, etc.
+- **Hooks:** **`useProgress(updateInterval?, background?)`** (interval in **milliseconds**; e.g. `useProgress(250)` = every 250 ms), `usePlaybackState()`, `useActiveTrack()`, `useIsPlaying()`, **`useSetupPlayer()`**, **`useMiniPlayer()`**, `useTrackPlayerEvents()`, etc.
 
 **Setup options** (e.g. in `setupPlayer` / `updateOptions`): `iosCategory` (e.g. `'playback'`), `iosCategoryOptions` (e.g. `['allowAirPlay','allowBluetooth','duckOthers']`), `autoHandleInterruptions`, `autoUpdateMetadata`, `waitForBuffer`, `minBuffer` / buffer-related options, `forwardJumpInterval` / `backwardJumpInterval` (seconds, e.g. 15), `progressUpdateEventInterval` (seconds). Types and options are in the package TypeScript definitions.
+
+## Global mini player (iOS & Android)
+
+The same APIs and hooks work on both iOS and Android, so you can build a single global mini player (e.g. a persistent bar above the tab bar) that works cross-platform.
+
+1. **Setup once at app root** with `useSetupPlayer()`. It runs `setupPlayer()` and, on Android, retries if the app was in the background, so you get a single `isPlayerReady` for both platforms.
+2. **In your mini player component**, use `useMiniPlayer()` to get:
+   - `hasTrack`, `isPlaying`, `isLoadingAudio`
+   - `track`, `trackTitle`, `trackArtist`, `trackArtwork`
+   - `togglePlayPause()`, `pause()`, `stop()`
+   - `refreshActiveTrack()`, `refreshPlaybackState()` (e.g. after returning from another screen)
+3. **Full-screen and close** are app-level: e.g. navigate to a full-screen player route for `openFullScreen`, and call `pause()` or `stop()` plus your own state/navigation for close.
+
+Example:
+
+```javascript
+import TrackPlayer, { useSetupPlayer, useMiniPlayer } from 'react-native-mp3-player';
+
+// At root (e.g. in a provider):
+const isPlayerReady = useSetupPlayer({ options: {}, serviceFactory: () => PlaybackService });
+
+// In your global mini player component (when isPlayerReady):
+const {
+  hasTrack, isPlaying, isLoadingAudio,
+  trackTitle, trackArtist, trackArtwork,
+  togglePlayPause, pause, stop,
+  refreshActiveTrack, refreshPlaybackState,
+} = useMiniPlayer();
+```
+
+Use `getActiveTrack()` and `getPlaybackState()` when you need to sync state after navigation or from a widget; the hooks stay in sync via events.
 
 ## Example app
 
