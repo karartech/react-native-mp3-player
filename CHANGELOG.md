@@ -1,3 +1,7 @@
+# [1.1.1](https://github.com/alkarartech/react-native-mp3-player/compare/v1.1.0...v1.1.1) (2026-03-19)
+
+- **ios:** Fix `MTAudioProcessingTapCreate` bridging for current Xcode / SDK (e.g. Xcode 26+): use `Unmanaged<MTAudioProcessingTap>?` for the out-parameter and `takeRetainedValue()` when assigning `audioTapProcessor` (`AudioTap.swift`).
+
 # [1.0.6](https://github.com/alkarartech/react-native-mp3-player/compare/v1.0.5...v1.0.6) (2025-03-14)
 
 - **ios (play/pause reliability):** Added **effectivePlaybackState** so the very next `getPlaybackState()` after `play()` or `pause()` (from JS or lock screen) returns the new state (e.g. `"playing"` / `"paused"`) instead of the previous one. The wrapper’s state updates asynchronously; we now set effective state synchronously and use it for both the event and `getPlaybackState()`.
