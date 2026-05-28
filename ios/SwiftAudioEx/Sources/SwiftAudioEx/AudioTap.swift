@@ -84,13 +84,19 @@ extension AVPlayerWrapper {
             audioTap.process(numberOfFrames: numberFrames, buffer: UnsafeMutableAudioBufferListPointer(bufferListInOut))
         }
         
-        // Newer Xcode / SDK versions import MTAudioProcessingTapCreate’s tap out-parameter as
-        // UnsafeMutablePointer<Unmanaged<MTAudioProcessingTap>?>; AudioToolbox returns a +1 retained tap.
+#if compiler(>=6.2)
+        // Xcode 26+ Swift overlay uses MTAudioProcessingTap? for the out-parameter instead of Unmanaged.
+        var tapRef: MTAudioProcessingTap?
+        let error = MTAudioProcessingTapCreate(kCFAllocatorDefault, &callbacks, kMTAudioProcessingTapCreationFlag_PreEffects, &tapRef)
+        assert(error == noErr)
+        params.audioTapProcessor = tapRef
+#else
+        // Xcode 16 and earlier: tap out-parameter is Unmanaged<MTAudioProcessingTap>?; AudioToolbox returns a +1 retained tap.
         var tapRef: Unmanaged<MTAudioProcessingTap>?
         let error = MTAudioProcessingTapCreate(kCFAllocatorDefault, &callbacks, kMTAudioProcessingTapCreationFlag_PreEffects, &tapRef)
         assert(error == noErr)
-        
         params.audioTapProcessor = tapRef?.takeRetainedValue()
+#endif
         
         audioMix.inputParameters = [params]
         item.audioMix = audioMix

@@ -411,6 +411,10 @@ class AVPlayerWrapper: AVPlayerWrapperProtocol {
     private func setupAVPlayer() {
         // disabled since we're not making use of video playback
         avPlayer.allowsExternalPlayback = false;
+        // iOS 16+: default policy can stop AVPlayer when the app backgrounds; explicit policy keeps audio alive with UIBackgroundModes audio + playback session.
+        if #available(iOS 16.0, *) {
+            avPlayer.audiovisualBackgroundPlaybackPolicy = .continuesIfPossible
+        }
 
         playerObserver.player = avPlayer
         playerObserver.startObserving()
