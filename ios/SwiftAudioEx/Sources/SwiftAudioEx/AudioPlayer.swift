@@ -216,7 +216,9 @@ public class AudioPlayer: AVPlayerWrapperDelegate {
                 nowPlayingInfoController.set(keyValues: [
                     MediaItemProperty.duration(0),
                     NowPlayingInfoProperty.playbackRate((playWhenReady ?? false) ? 1.0 : 0.0),
-                    NowPlayingInfoProperty.elapsedPlaybackTime(0)
+                    NowPlayingInfoProperty.elapsedPlaybackTime(0),
+                    NowPlayingInfoProperty.defaultPlaybackRate(1.0),
+                    NowPlayingInfoProperty.mediaType(.audio)
                 ])
                 loadNowPlayingMetaValues()
                 // Flush to MPNowPlayingInfoCenter immediately on main so lock screen widget appears on first play

@@ -69,11 +69,13 @@ class Track: AudioItem, TimePitching, AssetOptionsProviding {
     }
 
     func getArtist() -> String? {
-        return artist
+        if let artist = artist, !artist.isEmpty { return artist }
+        return "Unknown Artist"
     }
 
     func getTitle() -> String? {
-        return title
+        if let title = title, !title.isEmpty { return title }
+        return "Now Playing"
     }
 
     func getAlbumTitle() -> String? {

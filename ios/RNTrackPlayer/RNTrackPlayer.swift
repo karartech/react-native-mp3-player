@@ -61,6 +61,12 @@ public class RNTrackPlayer: NSObject, AudioSessionControllerDelegate {
             name: UIApplication.didEnterBackgroundNotification,
             object: nil
         )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleWillEnterForeground),
+            name: UIApplication.willEnterForegroundNotification,
+            object: nil
+        )
     }
 
     deinit {
@@ -216,7 +222,7 @@ public class RNTrackPlayer: NSObject, AudioSessionControllerDelegate {
             guard let self = self else { return MPRemoteCommandHandlerStatus.commandFailed }
             self.effectivePlaybackState = .paused
             self.player.pause()
-            self.updateNowPlayingPlaybackValuesOnMainIfNeeded()
+            self.refreshNowPlayingInfoCenter()
             self.emit(event: EventType.PlaybackState, body: self.getPlaybackStateBodyKeyValues(state: .paused))
             self.emit(event: EventType.RemotePause)
             return MPRemoteCommandHandlerStatus.success
@@ -226,7 +232,7 @@ public class RNTrackPlayer: NSObject, AudioSessionControllerDelegate {
             guard let self = self else { return MPRemoteCommandHandlerStatus.commandFailed }
             self.effectivePlaybackState = .playing
             self.player.play()
-            self.updateNowPlayingPlaybackValuesOnMainIfNeeded()
+            self.refreshNowPlayingInfoCenter()
             self.emit(event: EventType.PlaybackState, body: self.getPlaybackStateBodyKeyValues(state: .playing))
             self.emit(event: EventType.RemotePlay)
             return MPRemoteCommandHandlerStatus.success
@@ -267,7 +273,7 @@ public class RNTrackPlayer: NSObject, AudioSessionControllerDelegate {
             guard let self = self else { return MPRemoteCommandHandlerStatus.commandFailed }
             self.effectivePlaybackState = .stopped
             self.player.stop()
-            self.updateNowPlayingPlaybackValuesOnMainIfNeeded()
+            self.refreshNowPlayingInfoCenter()
             self.emit(event: EventType.PlaybackState, body: self.getPlaybackStateBodyKeyValues(state: .stopped))
             self.emit(event: EventType.RemoteStop)
             return MPRemoteCommandHandlerStatus.success
@@ -279,13 +285,13 @@ public class RNTrackPlayer: NSObject, AudioSessionControllerDelegate {
             if currentState == .paused || currentState == .stopped || currentState == .ended {
                 self.effectivePlaybackState = .playing
                 self.player.play()
-                self.updateNowPlayingPlaybackValuesOnMainIfNeeded()
+                self.refreshNowPlayingInfoCenter()
                 self.emit(event: EventType.PlaybackState, body: self.getPlaybackStateBodyKeyValues(state: .playing))
                 self.emit(event: EventType.RemotePlay)
             } else {
                 self.effectivePlaybackState = .paused
                 self.player.pause()
-                self.updateNowPlayingPlaybackValuesOnMainIfNeeded()
+                self.refreshNowPlayingInfoCenter()
                 self.emit(event: EventType.PlaybackState, body: self.getPlaybackStateBodyKeyValues(state: .paused))
                 self.emit(event: EventType.RemotePause)
             }
@@ -326,34 +332,49 @@ public class RNTrackPlayer: NSObject, AudioSessionControllerDelegate {
 
     private func configureAudioSession() {
         if player.currentItem == nil {
-            if UIApplication.shared.applicationState == .active {
+            let hasQueue = !player.items.isEmpty
+            let state = effectivePlaybackState ?? player.playerState
+            let playbackActive = state == .playing || state == .paused || state == .ready || state == .buffering || state == .loading
+            let isBackground = UIApplication.shared.applicationState != .active
+            // Only deactivate when truly idle in foreground — never while backgrounded or when a track is loaded/playing.
+            if UIApplication.shared.applicationState == .active && !hasQueue && !playbackActive {
                 try? audioSessionController.deactivateSession()
+            } else if isBackground || hasQueue || playbackActive {
+                configureAudioSessionForBackgroundPlayback()
             }
             return
         }
 
         // Activate session whenever we have a current item so playback works after load()+play()
         // (session may have been deactivated in setupPlayer when currentItem was nil).
-        try? audioSessionController.activateSession()
-        if #available(iOS 11.0, *) {
-            try? AVAudioSession.sharedInstance().setCategory(sessionCategory, mode: sessionCategoryMode, policy: sessionCategoryPolicy, options: sessionCategoryOptions)
+        configureAudioSessionForBackgroundPlayback()
+    }
+
+    /// Re-push metadata + playback values to MPNowPlayingInfoCenter so Control Center never shows "Not Playing" while a track is loaded.
+    private func refreshNowPlayingInfoCenter() {
+        guard player.currentItem != nil, player.automaticallyUpdateNowPlayingInfo else { return }
+        if Thread.isMainThread {
+            UIApplication.shared.beginReceivingRemoteControlEvents()
         } else {
-            try? AVAudioSession.sharedInstance().setCategory(sessionCategory, mode: sessionCategoryMode, options: sessionCategoryOptions)
+            DispatchQueue.main.async {
+                UIApplication.shared.beginReceivingRemoteControlEvents()
+            }
         }
-        try? AVAudioSession.sharedInstance().setActive(true, options: [])
+        player.loadNowPlayingMetaValues()
+        player.updateNowPlayingPlaybackValuesSync()
+        player.nowPlayingInfoController.pushToCenterSync()
     }
 
     @objc private func handleDidEnterBackground() {
         guard player.currentItem != nil else { return }
-        let session = AVAudioSession.sharedInstance()
-        do {
-            if #available(iOS 11.0, *) {
-                try session.setCategory(sessionCategory, mode: sessionCategoryMode, policy: sessionCategoryPolicy, options: sessionCategoryOptions)
-            } else {
-                try session.setCategory(sessionCategory, mode: sessionCategoryMode, options: sessionCategoryOptions)
-            }
-            try session.setActive(true, options: [])
-        } catch {}
+        configureAudioSessionForBackgroundPlayback()
+        refreshNowPlayingInfoCenter()
+    }
+
+    @objc private func handleWillEnterForeground() {
+        guard player.currentItem != nil else { return }
+        configureAudioSessionForBackgroundPlayback()
+        refreshNowPlayingInfoCenter()
     }
 
     @objc(isServiceRunning:rejecter:)
@@ -438,6 +459,8 @@ public class RNTrackPlayer: NSObject, AudioSessionControllerDelegate {
             items: tracks,
             at: index
         )
+        configureAudioSession()
+        refreshNowPlayingInfoCenter()
         resolve(index)
     }
 
@@ -455,6 +478,8 @@ public class RNTrackPlayer: NSObject, AudioSessionControllerDelegate {
         }
 
         player.load(item: track)
+        configureAudioSession()
+        refreshNowPlayingInfoCenter()
         resolve(player.currentIndex)
     }
 
@@ -585,7 +610,7 @@ public class RNTrackPlayer: NSObject, AudioSessionControllerDelegate {
         player.play()
         // Activate audio session when starting playback so sound actually plays (session may be inactive after setup when no track was loaded yet).
         configureAudioSession()
-        updateNowPlayingPlaybackValuesOnMainIfNeeded()
+        refreshNowPlayingInfoCenter()
         resolve(NSNull())
         emit(event: EventType.PlaybackState, body: getPlaybackStateBodyKeyValues(state: .playing))
     }
@@ -595,7 +620,7 @@ public class RNTrackPlayer: NSObject, AudioSessionControllerDelegate {
         if (rejectWhenNotInitialized(reject: reject)) { return }
         effectivePlaybackState = .paused
         player.pause()
-        updateNowPlayingPlaybackValuesOnMainIfNeeded()
+        refreshNowPlayingInfoCenter()
         resolve(NSNull())
         emit(event: EventType.PlaybackState, body: getPlaybackStateBodyKeyValues(state: .paused))
     }
@@ -953,6 +978,7 @@ public class RNTrackPlayer: NSObject, AudioSessionControllerDelegate {
             if self.player.automaticallyUpdateNowPlayingInfo {
                 let isTrackLiveStream = (item as? Track)?.isLiveStream ?? false
                 self.player.nowPlayingInfoController.set(keyValue: NowPlayingInfoProperty.isLiveStream(isTrackLiveStream))
+                self.refreshNowPlayingInfoCenter()
             }
         } else {
             DispatchQueue.main.async {
