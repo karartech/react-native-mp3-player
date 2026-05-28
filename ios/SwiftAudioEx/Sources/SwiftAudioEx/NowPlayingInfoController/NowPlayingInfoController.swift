@@ -62,39 +62,38 @@ public class NowPlayingInfoController: NowPlayingInfoControllerProtocol {
     }
 
     public func setPlaybackValuesSync(duration: TimeInterval, elapsed: TimeInterval, rate: Double) {
+        let safeDuration = duration.isFinite && duration >= 0 ? duration : 0
+        let safeElapsed = elapsed.isFinite && elapsed >= 0 ? elapsed : 0
+        let safeRate = rate.isFinite && rate >= 0 ? rate : 0
         lock.lock()
-        self.info[MPMediaItemPropertyPlaybackDuration] = NSNumber(value: duration)
-        self.info[MPNowPlayingInfoPropertyElapsedPlaybackTime] = NSNumber(value: elapsed)
-        self.info[MPNowPlayingInfoPropertyPlaybackRate] = NSNumber(value: rate)
+        self.info[MPMediaItemPropertyPlaybackDuration] = NSNumber(value: safeDuration)
+        self.info[MPNowPlayingInfoPropertyElapsedPlaybackTime] = NSNumber(value: safeElapsed)
+        self.info[MPNowPlayingInfoPropertyPlaybackRate] = NSNumber(value: safeRate)
         let snapshot = self.info
         lock.unlock()
-        if Thread.isMainThread {
-            infoCenter.nowPlayingInfo = snapshot
-        } else {
-            DispatchQueue.main.sync { [weak self] in
-                self?.infoCenter.nowPlayingInfo = snapshot
-            }
-        }
+        applySnapshotOnMain(snapshot)
     }
 
-    /// Push the current info dictionary to MPNowPlayingInfoCenter synchronously on main so the lock screen widget appears immediately.
-    /// Ensures remote control events are enabled before setting info so the lock screen works on first play (not only after stop → play again).
+    /// Push the current info dictionary to MPNowPlayingInfoCenter on the main queue.
+    /// Never uses main.sync — avoids deadlocks when called from the React Native bridge queue during play().
     public func pushToCenterSync() {
         lock.lock()
         let snapshot = self.info
         lock.unlock()
-        if Thread.isMainThread {
+        applySnapshotOnMain(snapshot)
+    }
+
+    private func applySnapshotOnMain(_ snapshot: [String: Any]) {
+        let apply = { [weak self] in
             #if canImport(UIKit)
             UIApplication.shared.beginReceivingRemoteControlEvents()
             #endif
-            infoCenter.nowPlayingInfo = snapshot
+            self?.infoCenter.nowPlayingInfo = snapshot
+        }
+        if Thread.isMainThread {
+            apply()
         } else {
-            DispatchQueue.main.sync { [weak self] in
-                #if canImport(UIKit)
-                UIApplication.shared.beginReceivingRemoteControlEvents()
-                #endif
-                self?.infoCenter.nowPlayingInfo = snapshot
-            }
+            DispatchQueue.main.async(execute: apply)
         }
     }
 
@@ -106,13 +105,7 @@ public class NowPlayingInfoController: NowPlayingInfoControllerProtocol {
     }
 
     private func pushToCenter(_ snapshot: [String: Any]) {
-        if Thread.isMainThread {
-            infoCenter.nowPlayingInfo = snapshot
-        } else {
-            DispatchQueue.main.async { [weak self] in
-                self?.infoCenter.nowPlayingInfo = snapshot
-            }
-        }
+        applySnapshotOnMain(snapshot)
     }
     
     public func clear() {

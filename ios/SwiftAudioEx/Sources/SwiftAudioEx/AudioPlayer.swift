@@ -360,7 +360,6 @@ public class AudioPlayer: AVPlayerWrapperDelegate {
         let isPlaying = wrapper.playWhenReady && wrapper.state == .playing
         let rate = isPlaying ? Double(wrapper.rate) : 0
         nowPlayingInfoController.setPlaybackValuesSync(duration: duration, elapsed: elapsed, rate: rate)
-        nowPlayingInfoController.pushToCenterSync()
     }
 
     public func clear() {

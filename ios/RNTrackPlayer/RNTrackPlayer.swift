@@ -382,19 +382,34 @@ public class RNTrackPlayer: NSObject, AudioSessionControllerDelegate {
         }
     }
 
-    /// Re-push metadata + playback values to MPNowPlayingInfoCenter so Control Center never shows "Not Playing" while a track is loaded.
+    /// Re-push metadata + playback values to MPNowPlayingInfoCenter (main queue only — safe from RN bridge thread).
     private func refreshNowPlayingInfoCenter() {
         guard player.currentItem != nil, player.automaticallyUpdateNowPlayingInfo else { return }
-        if Thread.isMainThread {
+        let update: () -> Void = { [weak self] in
+            guard let self = self, self.player.currentItem != nil else { return }
             UIApplication.shared.beginReceivingRemoteControlEvents()
-        } else {
-            DispatchQueue.main.async {
-                UIApplication.shared.beginReceivingRemoteControlEvents()
-            }
+            self.player.loadNowPlayingMetaValues()
+            self.player.updateNowPlayingPlaybackValuesSync()
         }
-        player.loadNowPlayingMetaValues()
-        player.updateNowPlayingPlaybackValuesSync()
-        player.nowPlayingInfoController.pushToCenterSync()
+        if Thread.isMainThread {
+            update()
+        } else {
+            DispatchQueue.main.async(execute: update)
+        }
+    }
+
+    /// Lightweight playback-rate/elapsed refresh without reloading metadata (safe during state transitions).
+    private func refreshNowPlayingPlaybackValuesOnly() {
+        guard player.currentItem != nil, player.automaticallyUpdateNowPlayingInfo else { return }
+        let update: () -> Void = { [weak self] in
+            guard let self = self, self.player.currentItem != nil else { return }
+            self.player.updateNowPlayingPlaybackValuesSync()
+        }
+        if Thread.isMainThread {
+            update()
+        } else {
+            DispatchQueue.main.async(execute: update)
+        }
     }
 
     @objc private func handleDidEnterBackground() {
@@ -936,7 +951,7 @@ public class RNTrackPlayer: NSObject, AudioSessionControllerDelegate {
         effectivePlaybackState = resolved
         emit(event: EventType.PlaybackState, body: getPlaybackStateBodyKeyValues(state: resolved))
         if player.currentItem != nil && player.automaticallyUpdateNowPlayingInfo {
-            refreshNowPlayingInfoCenter()
+            refreshNowPlayingPlaybackValuesOnly()
         }
         if (state == .ended) {
             emit(event: EventType.PlaybackQueueEnded, body: [
@@ -1090,8 +1105,7 @@ public class RNTrackPlayer: NSObject, AudioSessionControllerDelegate {
         if player.currentItem != nil {
             let state = resolvePlaybackState()
             effectivePlaybackState = state
-            refreshNowPlayingInfoCenter()
-            emit(event: EventType.PlaybackState, body: getPlaybackStateBodyKeyValues(state: state))
+            refreshNowPlayingPlaybackValuesOnly()
         }
         emit(
             event: EventType.PlaybackPlayWhenReadyChanged,
