@@ -345,9 +345,10 @@ public class AudioPlayer: AVPlayerWrapperDelegate {
      - Playback rate
      */
     func updateNowPlayingPlaybackValues() {
+        let isPlaying = wrapper.playWhenReady && wrapper.state == .playing
         nowPlayingInfoController.set(keyValues: [
             MediaItemProperty.duration(wrapper.duration),
-            NowPlayingInfoProperty.playbackRate(wrapper.playWhenReady ? Double(wrapper.rate) : 0),
+            NowPlayingInfoProperty.playbackRate(isPlaying ? Double(wrapper.rate) : 0),
             NowPlayingInfoProperty.elapsedPlaybackTime(wrapper.currentTime)
         ])
     }
@@ -356,8 +357,10 @@ public class AudioPlayer: AVPlayerWrapperDelegate {
     func updateNowPlayingPlaybackValuesSync() {
         let duration = wrapper.duration
         let elapsed = wrapper.currentTime
-        let rate = wrapper.playWhenReady ? Double(wrapper.rate) : 0
+        let isPlaying = wrapper.playWhenReady && wrapper.state == .playing
+        let rate = isPlaying ? Double(wrapper.rate) : 0
         nowPlayingInfoController.setPlaybackValuesSync(duration: duration, elapsed: elapsed, rate: rate)
+        nowPlayingInfoController.pushToCenterSync()
     }
 
     public func clear() {
@@ -385,6 +388,9 @@ public class AudioPlayer: AVPlayerWrapperDelegate {
                 self.nowPlayingInfoController.set(keyValue: MediaItemProperty.artwork(artwork))
             } else {
                 self.nowPlayingInfoController.set(keyValue: MediaItemProperty.artwork(nil))
+            }
+            if self.automaticallyUpdateNowPlayingInfo {
+                self.nowPlayingInfoController.pushToCenterSync()
             }
         }
     }
