@@ -80,7 +80,16 @@ public class RNTrackPlayer: NSObject, AudioSessionControllerDelegate {
     }
 
     private func emit(event: EventType, body: Any? = nil) {
-        delegate?.sendEvent(name: event.rawValue, body: body)
+        // RCT event emitters must run on the main queue (especially New Architecture). AVPlayer callbacks are not on main.
+        let send: () -> Void = { [weak self] in
+            guard let self = self else { return }
+            self.delegate?.sendEvent(name: event.rawValue, body: body as Any)
+        }
+        if Thread.isMainThread {
+            send()
+        } else {
+            DispatchQueue.main.async(execute: send)
+        }
     }
 
     // MARK: - AudioSessionControllerDelegate
@@ -227,8 +236,8 @@ public class RNTrackPlayer: NSObject, AudioSessionControllerDelegate {
         player.remoteCommandController.handlePauseCommand = { [weak self] _ in
             guard let self = self else { return MPRemoteCommandHandlerStatus.commandFailed }
             self.player.pause()
-            self.refreshNowPlayingInfoCenter()
-            let state = self.resolvePlaybackState()
+            self.refreshNowPlayingPlaybackValuesOnly()
+            let state = self.resolvePlaybackState(from: .paused)
             self.effectivePlaybackState = state
             self.emit(event: EventType.PlaybackState, body: self.getPlaybackStateBodyKeyValues(state: state))
             self.emit(event: EventType.RemotePause)
@@ -239,7 +248,7 @@ public class RNTrackPlayer: NSObject, AudioSessionControllerDelegate {
             guard let self = self else { return MPRemoteCommandHandlerStatus.commandFailed }
             self.player.play()
             self.configureAudioSession()
-            self.refreshNowPlayingInfoCenter()
+            self.refreshNowPlayingPlaybackValuesOnly()
             let state = self.resolvePlaybackState()
             self.effectivePlaybackState = state
             self.emit(event: EventType.PlaybackState, body: self.getPlaybackStateBodyKeyValues(state: state))
@@ -343,23 +352,33 @@ public class RNTrackPlayer: NSObject, AudioSessionControllerDelegate {
     }
 
     private func configureAudioSession() {
-        if player.currentItem == nil {
-            let hasQueue = !player.items.isEmpty
-            let state = effectivePlaybackState ?? player.playerState
-            let playbackActive = state == .playing || state == .paused || state == .ready || state == .buffering || state == .loading
-            let isBackground = UIApplication.shared.applicationState != .active
-            // Only deactivate when truly idle in foreground — never while backgrounded or when a track is loaded/playing.
-            if UIApplication.shared.applicationState == .active && !hasQueue && !playbackActive {
-                try? audioSessionController.deactivateSession()
-            } else if isBackground || hasQueue || playbackActive {
-                configureAudioSessionForBackgroundPlayback()
-            }
+        // Hot path: track loaded — activate session without touching UIApplication (must be main thread).
+        if player.currentItem != nil {
+            configureAudioSessionForBackgroundPlayback()
             return
         }
 
-        // Activate session whenever we have a current item so playback works after load()+play()
-        // (session may have been deactivated in setupPlayer when currentItem was nil).
-        configureAudioSessionForBackgroundPlayback()
+        let run: () -> Void = { [weak self] in
+            self?.configureAudioSessionWhenNoCurrentItem()
+        }
+        if Thread.isMainThread {
+            run()
+        } else {
+            DispatchQueue.main.async(execute: run)
+        }
+    }
+
+    /// Session policy when nothing is loaded yet — uses UIApplication and must run on main.
+    private func configureAudioSessionWhenNoCurrentItem() {
+        let hasQueue = !player.items.isEmpty
+        let state = effectivePlaybackState ?? player.playerState
+        let playbackActive = state == .playing || state == .paused || state == .ready || state == .buffering || state == .loading
+        let isBackground = UIApplication.shared.applicationState != .active
+        if UIApplication.shared.applicationState == .active && !hasQueue && !playbackActive {
+            try? audioSessionController.deactivateSession()
+        } else if isBackground || hasQueue || playbackActive {
+            configureAudioSessionForBackgroundPlayback()
+        }
     }
 
     /// Resolve the authoritative playback state. When the user has paused (playWhenReady == false),
@@ -1038,7 +1057,6 @@ public class RNTrackPlayer: NSObject, AudioSessionControllerDelegate {
             if self.player.automaticallyUpdateNowPlayingInfo {
                 let isTrackLiveStream = (item as? Track)?.isLiveStream ?? false
                 self.player.nowPlayingInfoController.set(keyValue: NowPlayingInfoProperty.isLiveStream(isTrackLiveStream))
-                self.refreshNowPlayingInfoCenter()
             }
         } else {
             DispatchQueue.main.async {

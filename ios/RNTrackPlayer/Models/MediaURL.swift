@@ -13,26 +13,29 @@ struct MediaURL {
     let value: URL
     let isLocal: Bool
     private let originalObject: Any
-    
+
     init?(object: Any?) {
         guard let object = object else { return nil }
         originalObject = object
-        
-        // This is based on logic found in RCTConvert NSURLRequest, 
-        // and uses RCTConvert NSURL to create a valid URL from various formats
+
         if let localObject = object as? [String: Any] {
-            var url = localObject["uri"] as? String ?? localObject["url"] as! String
-            
+            guard let urlString = localObject["uri"] as? String ?? localObject["url"] as? String else {
+                return nil
+            }
+            var url = urlString
+
             if let bundleName = localObject["bundle"] as? String {
                 url = String(format: "%@.bundle/%@", bundleName, url)
             }
-            
-            isLocal = url.lowercased().hasPrefix("http") ? false : true
+
+            isLocal = !url.lowercased().hasPrefix("http")
             value = RCTConvert.nsurl(url)
-        } else {
-            let url = object as! String
+        } else if let url = object as? String {
             isLocal = url.lowercased().hasPrefix("file://")
             value = RCTConvert.nsurl(url)
+        } else {
+            // RN asset module IDs (numbers) must be resolved to { uri } in JS before reaching native.
+            return nil
         }
     }
 }
