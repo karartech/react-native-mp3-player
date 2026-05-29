@@ -40,18 +40,17 @@ public class RNTrackPlayer: NSObject, AudioSessionControllerDelegate {
 
     // MARK: - Lifecycle Methods
 
-    /// Default options for .playback category (no .defaultToSpeaker; that is only valid for .playbackAndRecord).
-    /// Options compatible with `.longFormAudio` (duckOthers is not supported with that policy).
-    private static let defaultPlaybackCategoryOptions: AVAudioSession.CategoryOptions = [.allowBluetooth, .allowBluetoothA2DP, .allowAirPlay]
+    /// With `.longFormAudio`, iOS rejects most category options (allowBluetooth, allowAirPlay, duckOthers, etc.).
+    private static let defaultPlaybackCategoryOptions: AVAudioSession.CategoryOptions = []
 
     private static func sanitizedCategoryOptions(
         _ options: AVAudioSession.CategoryOptions,
         policy: AVAudioSession.RouteSharingPolicy
     ) -> AVAudioSession.CategoryOptions {
         if policy == .longFormAudio {
-            return options.subtracting([.duckOthers, .mixWithOthers])
+            return []
         }
-        return options
+        return options.subtracting([.duckOthers, .mixWithOthers])
     }
 
     public override init() {
@@ -379,7 +378,11 @@ public class RNTrackPlayer: NSObject, AudioSessionControllerDelegate {
                 try session.setCategory(sessionCategory, mode: sessionCategoryMode, options: options)
             }
             try session.setActive(true, options: [])
-        } catch {}
+        } catch {
+            #if DEBUG
+            print("[react-native-mp3-player] AVAudioSession error: \(error.localizedDescription)")
+            #endif
+        }
     }
 
     private func configureAudioSession() {
@@ -730,7 +733,7 @@ public class RNTrackPlayer: NSObject, AudioSessionControllerDelegate {
             }
             self.player.play()
             self.configureAudioSession()
-            self.refreshNowPlayingPlaybackValuesOnly()
+            self.refreshNowPlayingInfoCenter()
             let state = self.resolvePlaybackState()
             self.effectivePlaybackState = state
             resolve(NSNull())
@@ -1026,7 +1029,11 @@ public class RNTrackPlayer: NSObject, AudioSessionControllerDelegate {
         effectivePlaybackState = resolved
         emit(event: EventType.PlaybackState, body: getPlaybackStateBodyKeyValues(state: resolved))
         if player.currentItem != nil && player.automaticallyUpdateNowPlayingInfo {
-            refreshNowPlayingPlaybackValuesOnly()
+            if state == .ready {
+                refreshNowPlayingInfoCenter()
+            } else {
+                refreshNowPlayingPlaybackValuesOnly()
+            }
         }
         if (state == .ended) {
             emit(event: EventType.PlaybackQueueEnded, body: [
