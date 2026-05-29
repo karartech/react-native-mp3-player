@@ -57,20 +57,17 @@ class AVPlayerWrapper: AVPlayerWrapperProtocol {
     var _state: AVPlayerWrapperState = AVPlayerWrapperState.idle
     var state: AVPlayerWrapperState {
         get {
-            var state: AVPlayerWrapperState!
-            stateQueue.sync {
-                state = _state
-            }
-
-            return state
+            return stateQueue.sync { _state }
         }
         set {
             stateQueue.async(flags: .barrier) { [weak self] in
                 guard let self = self else { return }
-                let currentState = self._state
-                if (currentState != newValue) {
-                    self._state = newValue
-                    self.delegate?.AVWrapper(didChangeState: newValue)
+                guard self._state != newValue else { return }
+                self._state = newValue
+                let updated = newValue
+                // Never invoke delegate on stateQueue — AudioPlayer reads wrapper.state and deadlocks on dispatch_sync.
+                DispatchQueue.main.async { [weak self] in
+                    self?.delegate?.AVWrapper(didChangeState: updated)
                 }
             }
         }

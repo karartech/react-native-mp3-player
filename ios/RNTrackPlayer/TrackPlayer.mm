@@ -25,11 +25,17 @@ RCT_EXPORT_MODULE()
 }
 
 + (BOOL)requiresMainQueueSetup {
-    return NO;
+    return YES;
 }
 
 - (void)sendEvent:(NSString *)name body:(id)body {
-  [super sendEventWithName:name body:body];
+  if ([NSThread isMainThread]) {
+    [super sendEventWithName:name body:body];
+  } else {
+    dispatch_async(dispatch_get_main_queue(), ^{
+      [super sendEventWithName:name body:body];
+    });
+  }
 }
 
 - (NSArray<NSString *> *) supportedEvents {

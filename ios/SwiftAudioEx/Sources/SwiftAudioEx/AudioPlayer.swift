@@ -177,7 +177,7 @@ public class AudioPlayer: AVPlayerWrapperDelegate {
         set {
             wrapper.rate = newValue
             if (automaticallyUpdateNowPlayingInfo) {
-                updateNowPlayingPlaybackValues()
+                updateNowPlayingPlaybackValuesFromCurrentState()
             }
         }
     }
@@ -344,13 +344,23 @@ public class AudioPlayer: AVPlayerWrapperDelegate {
      - Duration
      - Playback rate
      */
-    func updateNowPlayingPlaybackValues() {
-        let isPlaying = wrapper.playWhenReady && wrapper.state == .playing
+    func updateNowPlayingPlaybackValues(forState playbackState: AVPlayerWrapperState) {
+        let isPlaying = wrapper.playWhenReady && playbackState == .playing
         nowPlayingInfoController.set(keyValues: [
             MediaItemProperty.duration(wrapper.duration),
             NowPlayingInfoProperty.playbackRate(isPlaying ? Double(wrapper.rate) : 0),
             NowPlayingInfoProperty.elapsedPlaybackTime(wrapper.currentTime)
         ])
+    }
+
+    func updateNowPlayingPlaybackValuesFromCurrentState() {
+        guard Thread.isMainThread else {
+            DispatchQueue.main.async { [weak self] in
+                self?.updateNowPlayingPlaybackValuesFromCurrentState()
+            }
+            return
+        }
+        updateNowPlayingPlaybackValues(forState: wrapper.state)
     }
 
     /// Pushes current duration/elapsed/rate to MPNowPlayingInfoCenter synchronously on main so the widget updates before returning (e.g. after play/pause).
@@ -414,7 +424,7 @@ public class AudioPlayer: AVPlayerWrapperDelegate {
         switch state {
         case .ready, .loading, .playing, .paused:
             if (automaticallyUpdateNowPlayingInfo) {
-                updateNowPlayingPlaybackValues()
+                updateNowPlayingPlaybackValues(forState: state)
             }
         default: break
         }
