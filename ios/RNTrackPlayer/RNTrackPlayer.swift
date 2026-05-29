@@ -662,7 +662,7 @@ public class RNTrackPlayer: NSObject, AudioSessionControllerDelegate {
         if (rejectWhenNotInitialized(reject: reject)) { return }
         player.play()
         configureAudioSession()
-        refreshNowPlayingInfoCenter()
+        refreshNowPlayingPlaybackValuesOnly()
         let state = resolvePlaybackState()
         effectivePlaybackState = state
         resolve(NSNull())
@@ -673,7 +673,7 @@ public class RNTrackPlayer: NSObject, AudioSessionControllerDelegate {
     public func pause(resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
         if (rejectWhenNotInitialized(reject: reject)) { return }
         player.pause()
-        refreshNowPlayingInfoCenter()
+        refreshNowPlayingPlaybackValuesOnly()
         let state = resolvePlaybackState(from: .paused)
         effectivePlaybackState = state
         resolve(NSNull())
